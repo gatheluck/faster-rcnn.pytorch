@@ -26,7 +26,7 @@ from model.utils.net_utils import weights_normal_init, save_net, load_net, \
       adjust_learning_rate, save_checkpoint, clip_gradient
 
 from option import TrainOptions
-from model.faster_rcnn.ours_resnet import resnet 
+from model.faster_rcnn.resnet import resnet 
 
 class sampler(Sampler):
 	def __init__(self, train_size, batch_size):
