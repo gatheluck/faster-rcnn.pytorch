@@ -25,7 +25,7 @@ from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
 from model.utils.net_utils import weights_normal_init, save_net, load_net, \
       adjust_learning_rate, save_checkpoint, clip_gradient
 
-from ours_option import TrainOptions
+from option import TrainOptions
 from model.faster_rcnn.ours_resnet import resnet 
 
 class sampler(Sampler):
