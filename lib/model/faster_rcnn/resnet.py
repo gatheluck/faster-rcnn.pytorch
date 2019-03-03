@@ -22,9 +22,9 @@ class resnet(_fasterRCNN):
 		self.opt = opt
 		self.class_agnostic = class_agnostic
 
-		if opt.model == 'resnet18' or 'resnet34':
+		if (self.opt.model == 'resnet18') or (self.opt.model == 'resnet34'):
 			self.dout_base_model = 256			
-		elif opt.model == 'resnet50':
+		elif self.opt.model == 'resnet50':
 			self.dout_base_model = 1024
 		else:
 			raise NotImplementedError
@@ -43,7 +43,7 @@ class resnet(_fasterRCNN):
 			resnet.load_state_dict(torch.load(self.model_path))
 
 		# RCNN
-		if self.opt.model == 'resnet18' or 'resnet34' or 'resnet50' or 'resnet101':
+		if (self.opt.model == 'resnet18') or (self.opt.model == 'resnet34') or (self.opt.model == 'resnet50') or (self.opt.model =='resnet101'):
 			self.RCNN_base = nn.Sequential(resnet.features._modules["0"], 
 																		resnet.features._modules["1"],
 																		resnet.features._modules["2"],
@@ -56,7 +56,7 @@ class resnet(_fasterRCNN):
 			raise NotImplementedError
 
 
-		if self.opt.model == 'resnet18' or 'resnet34':
+		if (self.opt.model == 'resnet18') or (self.opt.model == 'resnet34'):
 			self.RCNN_cls_score = nn.Linear(512, self.n_classes)
 			if self.class_agnostic:
 				self.RCNN_bbox_pred = nn.Linear(512, 4)

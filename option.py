@@ -119,3 +119,13 @@ class TrainOptions(BaseOptions):
 	def initialize(self, parser):
 		parser = BaseOptions.initialize(self, parser)
 		return parser
+
+class TestOptions(BaseOptions):
+	def initialize(self, parser):
+		parser = BaseOptions.initialize(self, parser)
+
+		parser.add_argument('--cfg', dest='cfg_file', type=str, required=True, help='optional config file')
+		
+
+
+		return parser
