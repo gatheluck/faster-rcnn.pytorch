@@ -125,7 +125,8 @@ class TestOptions(BaseOptions):
 		parser = BaseOptions.initialize(self, parser)
 
 		parser.add_argument('--cfg', dest='cfg_file', type=str, required=True, help='optional config file')
-		
+		parser.add_argument('--weight_rcnn', type=str, required=True, help='path of rcnn model weight')
 
+		parser.add_argument('--vis', action='store_true', help='visualization mode')
 
 		return parser

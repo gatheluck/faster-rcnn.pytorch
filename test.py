@@ -29,6 +29,11 @@ from model.faster_rcnn.resnet import resnet
 import pdb
 from option import TestOptions
 
+try:
+	xrange          # Python 2
+except NameError:
+	xrange = range  # Python 3
+
 
 lr = cfg.TRAIN.LEARNING_RATE
 momentum = cfg.TRAIN.MOMENTUM
@@ -39,23 +44,23 @@ def main():
 	opt = TestOptions().parse()
 
 	np.random.seed(cfg.RNG_SEED)
-	if opt.dataset == "pascal_voc":
+	if opt.dataset_rcnn == "pascal_voc":
 		opt.imdb_name = "voc_2007_trainval"
 		opt.imdbval_name = "voc_2007_test"
 		opt.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-	elif opt.dataset == "pascal_voc_0712":
+	elif opt.dataset_rcnn == "pascal_voc_0712":
 		opt.imdb_name = "voc_2007_trainval+voc_2012_trainval"
 		opt.imdbval_name = "voc_2007_test"
 		opt.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-	elif opt.dataset == "coco":
+	elif opt.dataset_rcnn == "coco":
 		opt.imdb_name = "coco_2014_train+coco_2014_valminusminival"
 		opt.imdbval_name = "coco_2014_minival"
 		opt.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-	elif opt.dataset == "imagenet":
+	elif opt.dataset_rcnn == "imagenet":
 		opt.imdb_name = "imagenet_train"
 		opt.imdbval_name = "imagenet_val"
 		opt.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-	elif opt.dataset == "vg":
+	elif opt.dataset_rcnn == "vg":
 		opt.imdb_name = "vg_150-50-50_minitrain"
 		opt.imdbval_name = "vg_150-50-50_minival"
 		opt.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
@@ -76,11 +81,10 @@ def main():
 
 	print('{:d} roidb entries'.format(len(roidb)))
 
-	input_dir = opt.logs + "/" + opt.model + "/" + opt.dataset
-	if not os.path.exists(input_dir):
-		raise Exception('There is no input directory for loading network from ' + input_dir)
-	load_name = os.path.join(input_dir,
-		'faster_rcnn_{}_{}_{}.pth'.format(opt.checksession, opt.checkepoch, opt.checkpoint))
+	# input_dir = opt.logs + "/" + opt.model + "/" + opt.dataset
+	# if not os.path.exists(input_dir):
+	# 	raise Exception('There is no input directory for loading network from ' + input_dir)
+	# load_name = os.path.join(input_dir,'faster_rcnn_{}_{}_{}.pth'.format(opt.checksession, opt.checkepoch, opt.checkpoint))
 
 	# initilize the network here.
 	if opt.model == 'lenet':
@@ -101,9 +105,11 @@ def main():
 
 	fasterRCNN.create_architecture()
 
-	print("load checkpoint %s" % (load_name))
-	checkpoint = torch.load(load_name)
-	fasterRCNN.load_state_dict(checkpoint['model']).to(opt.device)
+	print("load checkpoint %s" % (opt.weight_rcnn))
+	checkpoint = torch.load(opt.weight_rcnn)
+	fasterRCNN.load_state_dict(checkpoint['model'])
+	fasterRCNN = fasterRCNN.to(opt.device)
+
 	if 'pooling_mode' in checkpoint.keys():
 		cfg.POOLING_MODE = checkpoint['pooling_mode']
 
@@ -142,7 +148,7 @@ def main():
 	data_iter = iter(dataloader)
 
 	_t = {'im_detect': time.time(), 'misc': time.time()}
-	det_file = os.path.join(output_dir, 'detections.pkl')
+	det_file = os.path.join(opt.log_dir, 'detections.pkl')
 	
 	fasterRCNN.eval()
 	empty_array = np.transpose(np.array([[],[],[],[],[]]), (1,0))
@@ -174,7 +180,7 @@ def main():
 			box_deltas = bbox_pred.data
 			if cfg.TRAIN.BBOX_NORMALIZE_TARGETS_PRECOMPUTED:
 			# Optionally normalize targets by a precomputed mean and stdev
-				if args.class_agnostic:
+				if opt.class_agnostic:
 					box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
 												+ torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
 					box_deltas = box_deltas.view(1, -1, 4)
@@ -205,7 +211,7 @@ def main():
 			if inds.numel() > 0:
 				cls_scores = scores[:,j][inds]
 				_, order = torch.sort(cls_scores, 0, True)
-				if args.class_agnostic:
+				if opt.class_agnostic:
 					cls_boxes = pred_boxes[inds, :]
 				else:
 					cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
@@ -239,8 +245,8 @@ def main():
 		sys.stdout.flush()
 
 		if vis:
-			cv2.imwrite('result.png', im2show)
-			pdb.set_trace()
+			cv2.imwrite(opt.log_dir+'/result{:04d}.png'.format(i), im2show)
+			# pdb.set_trace()
 			#cv2.imshow('test', im2show)
 			#cv2.waitKey(0)
 
@@ -249,7 +255,7 @@ def main():
 		pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
 
 	print('Evaluating detections')
-	imdb.evaluate_detections(all_boxes, output_dir)
+	imdb.evaluate_detections(all_boxes, opt.log_dir)
 
 	end = time.time()
 	print("test time: %0.4fs" % (end - start))
