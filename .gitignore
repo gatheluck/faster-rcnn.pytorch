@@ -26,8 +26,8 @@ aten/build/
 aten/src/ATen/Config.h
 aten/src/ATen/cuda/CUDAConfig.h
 build/
-logs/
 data/
+logs/
 dist/
 docs/src/**/*
 test/.coverage
