@@ -30,64 +30,68 @@ from roi_data_layer.roibatchLoader import roibatchLoader
 from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
 from model.utils.net_utils import weights_normal_init, save_net, load_net, adjust_learning_rate, save_checkpoint, clip_gradient
 
+from tensorboardX import SummaryWriter
+
 from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
+
+from options import TrainOptions
 
 datasets = ['pascal_voc']
 architectures = ['vgg16','res50','res101','res152']
 
-def parse_args():
-	"""
-	Parse input arguments
-	"""
-	parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
-	parser.add_argument('--dataset', type=str, required=True, choices=datasets, help='training dataset')
-	parser.add_argument('--net', type=str, required=True, choices=architectures, help='vgg16 | res50 | res101 | res152')
-	parser.add_argument('--weight_bb', type=str, required=True, help='path to backbone weight')
-	parser.add_argument('--start_epoch', dest='start_epoch',
-											help='starting epoch',
-											default=1, type=int)
-	parser.add_argument('--epochs', dest='max_epochs',
-											help='number of epochs to train',
-											default=20, type=int)
-	parser.add_argument('--disp_interval', dest='disp_interval',
-											help='number of iterations to display',
-											default=100, type=int)
-	parser.add_argument('--checkpoint_interval', dest='checkpoint_interval',
-											help='number of iterations to display',
-											default=10000, type=int)
+# def parse_args():
+# 	"""
+# 	Parse input arguments
+# 	"""
+# 	parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
+# 	parser.add_argument('--dataset', type=str, required=True, choices=datasets, help='training dataset')
+# 	parser.add_argument('--net', type=str, required=True, choices=architectures, help='vgg16 | res50 | res101 | res152')
+# 	parser.add_argument('--bb_weight', type=str, required=True, help='path to backbone weight')
+# 	# parser.add_argument('--start_epoch', dest='start_epoch',
+# 	# 										help='starting epoch',
+# 	# 										default=1, type=int)
+# 	parser.add_argument('--epochs', dest='max_epochs',
+# 											help='number of epochs to train',
+# 											default=20, type=int)
+# 	parser.add_argument('--disp_interval', dest='disp_interval',
+# 											help='number of iterations to display',
+# 											default=100, type=int)
+# 	parser.add_argument('--checkpoint_interval', dest='checkpoint_interval',
+# 											help='number of iterations to display',
+# 											default=10000, type=int)
 
-	parser.add_argument('--save_dir', dest='save_dir', type=str, required=True, help='directory to save models')
-	parser.add_argument('--nw', dest='num_workers',
-											help='number of worker to load data',
-											default=0, type=int)
-	parser.add_argument('--cuda', dest='cuda',
-											help='whether use CUDA',
-											action='store_true')
-	parser.add_argument('--ls', dest='large_scale',
-											help='whether use large imag scale',
-											action='store_true')                      
-	parser.add_argument('--mGPUs', dest='mGPUs',
-											help='whether use multiple GPUs',
-											action='store_true')
-	parser.add_argument('--bs', dest='batch_size', type=int, required=True, help='batch_size')
-	parser.add_argument('--cag', dest='class_agnostic',
-											help='whether perform class_agnostic bbox regression',
-											action='store_true')
+# 	parser.add_argument('--save_dir', dest='save_dir', type=str, required=True, help='directory to save models')
+# 	parser.add_argument('--nw', dest='num_workers',
+# 											help='number of worker to load data',
+# 											default=0, type=int)
+# 	parser.add_argument('--cuda', dest='cuda',
+# 											help='whether use CUDA',
+# 											action='store_true')
+# 	parser.add_argument('--ls', dest='large_scale',
+# 											help='whether use large imag scale',
+# 											action='store_true')                      
+# 	parser.add_argument('--mGPUs', dest='mGPUs',
+# 											help='whether use multiple GPUs',
+# 											action='store_true')
+# 	parser.add_argument('--bs', dest='batch_size', type=int, required=True, help='batch_size')
+# 	parser.add_argument('--cag', dest='class_agnostic',
+# 											help='whether perform class_agnostic bbox regression',
+# 											action='store_true')
 
-	# config optimization
-	parser.add_argument('--o', dest='optimizer',
-											help='training optimizer',
-											default="sgd", type=str)
-	parser.add_argument('--lr', dest='lr',
-											help='starting learning rate',
-											default=0.001, type=float)
-	parser.add_argument('--lr_decay_step', dest='lr_decay_step',
-											help='step to do learning rate decay, unit is epoch',
-											default=5, type=int)
-	parser.add_argument('--lr_decay_gamma', dest='lr_decay_gamma',
-											help='learning rate decay ratio',
-											default=0.1, type=float)
+# 	# config optimization
+# 	parser.add_argument('--o', dest='optimizer',
+# 											help='training optimizer',
+# 											default="sgd", type=str)
+# 	parser.add_argument('--lr', dest='lr',
+# 											help='starting learning rate',
+# 											default=0.001, type=float)
+# 	parser.add_argument('--lr_decay_step', dest='lr_decay_step',
+# 											help='step to do learning rate decay, unit is epoch',
+# 											default=5, type=int)
+# 	parser.add_argument('--lr_decay_gamma', dest='lr_decay_gamma',
+# 											help='learning rate decay ratio',
+# 											default=0.1, type=float)
 
 	# set training session
 	# parser.add_argument('--s', dest='session',
@@ -95,25 +99,25 @@ def parse_args():
 	# 										default=1, type=int)
 
 	# resume trained model
-	parser.add_argument('--r', dest='resume',
-											help='resume checkpoint or not',
-											default=False, type=bool)
+	# parser.add_argument('--r', dest='resume',
+	# 										help='resume checkpoint or not',
+	# 										default=False, type=bool)
 	# parser.add_argument('--checksession', dest='checksession',
 	# 										help='checksession to load model',
 	# 										default=1, type=int)
-	parser.add_argument('--checkepoch', dest='checkepoch',
-											help='checkepoch to load model',
-											default=1, type=int)
+	# parser.add_argument('--checkepoch', dest='checkepoch',
+	# 										help='checkepoch to load model',
+	# 										default=1, type=int)
 	# parser.add_argument('--checkpoint', dest='checkpoint',
 	# 										help='checkpoint to load model',
 	# 										default=0, type=int)
 	# log and diaplay
-	parser.add_argument('--use_tfb', dest='use_tfboard',
-											help='whether use tensorboard',
-											action='store_true')
+	# parser.add_argument('--use_tfb', dest='use_tfboard',
+	# 										help='whether use tensorboard',
+	# 										action='store_true')
 
-	args = parser.parse_args()
-	return args
+	# args = parser.parse_args()
+	# return args
 
 
 class sampler(Sampler):
@@ -143,15 +147,17 @@ class sampler(Sampler):
 
 if __name__ == '__main__':
 
-	args = parse_args()
+	# args = parse_args()
 
-	print('Called with args:')
-	print(args)
+	# print('Called with args:')
+	# print(args)
 
-	if args.dataset == "pascal_voc":
-			args.imdb_name    = "voc_2007_trainval"
-			args.imdbval_name = "voc_2007_test"
-			args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
+	opt = TrainOptions().parse()
+
+	if opt.dataset == "pascal":
+			opt.imdb_name    = "voc_2007_trainval"
+			opt.imdbval_name = "voc_2007_test"
+			opt.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
 	# elif args.dataset == "pascal_voc_0712":
 	# 		args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
 	# 		args.imdbval_name = "voc_2007_test"
@@ -174,58 +180,54 @@ if __name__ == '__main__':
 		raise NotImplementedError
 
 
-	if args.large_scale:
-		args.cfg_file = "cfgs/{}_ls.yml".format(args.net) 
-	else:
-		args.cfg_file = "cfgs/{}.yml".format(args.net)
+	# if args.large_scale:
+	# 	args.cfg_file = "cfgs/{}_ls.yml".format(args.net) 
+	# else:
+	opt.cfg_file = "cfgs/{}.yml".format(opt.arch)
 
 	# args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
 
-	if args.cfg_file is not None:
-		cfg_from_file(args.cfg_file)
-	if args.set_cfgs is not None:
-		cfg_from_list(args.set_cfgs)
+	if opt.cfg_file is not None:
+		cfg_from_file(opt.cfg_file)
+	if opt.set_cfgs is not None:
+		cfg_from_list(opt.set_cfgs)
 
 	print('Using config:')
 	pprint.pprint(cfg)
 	np.random.seed(cfg.RNG_SEED)
 
-	if torch.cuda.is_available() and not args.cuda:
-		print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+	# if torch.cuda.is_available() and not args.cuda:
+	# 	print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
 	# train set
 	# -- Note: Use validation set and disable the flipped to enable faster loading.
 	cfg.TRAIN.USE_FLIPPED = True
-	cfg.USE_GPU_NMS = args.cuda
-	imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
+	cfg.USE_GPU_NMS = opt.cuda
+	imdb, roidb, ratio_list, ratio_index = combined_roidb(opt.imdb_name)
 	train_size = len(roidb)
 
 	print('{:d} roidb entries'.format(len(roidb)))
 
-	output_dir = args.save_dir + "/" + args.net + "/" + args.dataset
-	if not os.path.exists(output_dir):
-		os.makedirs(output_dir)
+	# if not os.path.exists(out.log_dir):
+	# 	os.makedirs(output_dir)
 
-	sampler_batch = sampler(train_size, args.batch_size)
+	sampler_batch = sampler(train_size, opt.batch_size)
 
-	dataset = roibatchLoader(roidb, ratio_list, ratio_index, args.batch_size, \
-														imdb.num_classes, training=True)
-
-	dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size,
-														sampler=sampler_batch, num_workers=args.num_workers)
+	dataset = roibatchLoader(roidb, ratio_list, ratio_index, opt.batch_size, imdb.num_classes, training=True)
+	dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, sampler=sampler_batch, num_workers=opt.num_workers)
 
 	# initilize the tensor holder here.
-	im_data = torch.FloatTensor(1)
-	im_info = torch.FloatTensor(1)
-	num_boxes = torch.LongTensor(1)
-	gt_boxes = torch.FloatTensor(1)
+	im_data = torch.FloatTensor(1).to(opt.device)
+	im_info = torch.FloatTensor(1).to(opt.device)
+	num_boxes = torch.LongTensor(1).to(opt.device)
+	gt_boxes = torch.FloatTensor(1).to(opt.device)
 
 	# ship to cuda
-	if args.cuda:
-		im_data = im_data.cuda()
-		im_info = im_info.cuda()
-		num_boxes = num_boxes.cuda()
-		gt_boxes = gt_boxes.cuda()
+	# if opt.cuda:
+	# 	im_data = im_data.cuda()
+	# 	im_info = im_info.cuda()
+	# 	num_boxes = num_boxes.cuda()
+	# 	gt_boxes = gt_boxes.cuda()
 
 	# make variable
 	im_data = Variable(im_data)
@@ -233,18 +235,18 @@ if __name__ == '__main__':
 	num_boxes = Variable(num_boxes)
 	gt_boxes = Variable(gt_boxes)
 
-	if args.cuda:
+	if opt.cuda:
 		cfg.CUDA = True
 
 	# initilize the network here.
-	if args.net == 'vgg16':
-		fasterRCNN = vgg16(imdb.classes, args.weight_bb, class_agnostic=args.class_agnostic)
-	elif args.net == 'res101':
-		fasterRCNN = resnet(imdb.classes, 101, args.weight_bb, class_agnostic=args.class_agnostic)
-	elif args.net == 'res50':
-		fasterRCNN = resnet(imdb.classes, 50, args.weight_bb, class_agnostic=args.class_agnostic)
-	elif args.net == 'res152':
-		fasterRCNN = resnet(imdb.classes, 152, args.weight_bb, class_agnostic=args.class_agnostic)
+	if opt.arch == 'vgg16':
+		fasterRCNN = vgg16(imdb.classes, opt.bb_weight, class_agnostic=opt.cag)
+	elif opt.arch == 'res50':
+		fasterRCNN = resnet(imdb.classes, 50, opt.bb_weight, class_agnostic=opt.cag)
+	elif opt.arch == 'res101':
+		fasterRCNN = resnet(imdb.classes, 101, opt.bb_weight, class_agnostic=opt.cag)
+	elif opt.net == 'res152':
+		fasterRCNN = resnet(imdb.classes, 152, opt.bb_weight, class_agnostic=opt.cag)
 	else:
 		print("network is not defined")
 		pdb.set_trace()
@@ -252,7 +254,7 @@ if __name__ == '__main__':
 	fasterRCNN.create_architecture()
 
 	lr = cfg.TRAIN.LEARNING_RATE
-	lr = args.lr
+	lr = opt.lr
 	#tr_momentum = cfg.TRAIN.MOMENTUM
 	#tr_momentum = args.momentum
 
@@ -265,49 +267,46 @@ if __name__ == '__main__':
 			else:
 				params += [{'params':[value],'lr':lr, 'weight_decay': cfg.TRAIN.WEIGHT_DECAY}]
 
-	if args.optimizer == "adam":
+	if opt.optimizer == "adam":
 		lr = lr * 0.1
 		optimizer = torch.optim.Adam(params)
 
-	elif args.optimizer == "sgd":
+	elif opt.optimizer == "sgd":
 		optimizer = torch.optim.SGD(params, momentum=cfg.TRAIN.MOMENTUM)
 
-	if args.resume:
-		load_name = os.path.join(output_dir,
-			'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
-		print("loading checkpoint %s" % (load_name))
-		checkpoint = torch.load(load_name)
-		args.session = checkpoint['session']
-		args.start_epoch = checkpoint['epoch']
-		fasterRCNN.load_state_dict(checkpoint['model'])
-		optimizer.load_state_dict(checkpoint['optimizer'])
-		lr = optimizer.param_groups[0]['lr']
-		if 'pooling_mode' in checkpoint.keys():
-			cfg.POOLING_MODE = checkpoint['pooling_mode']
-		print("loaded checkpoint %s" % (load_name))
+	# if args.resume:
+	# 	load_name = os.path.join(output_dir,
+	# 		'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
+	# 	print("loading checkpoint %s" % (load_name))
+	# 	checkpoint = torch.load(load_name)
+	# 	args.session = checkpoint['session']
+	# 	args.start_epoch = checkpoint['epoch']
+	# 	fasterRCNN.load_state_dict(checkpoint['model'])
+	# 	optimizer.load_state_dict(checkpoint['optimizer'])
+	# 	lr = optimizer.param_groups[0]['lr']
+	# 	if 'pooling_mode' in checkpoint.keys():
+	# 		cfg.POOLING_MODE = checkpoint['pooling_mode']
+	# 	print("loaded checkpoint %s" % (load_name))
 
-	if args.mGPUs:
-		fasterRCNN = nn.DataParallel(fasterRCNN)
+	if opt.mGPUs:	fasterRCNN = nn.DataParallel(fasterRCNN)
+	if opt.cuda:	fasterRCNN.cuda()
 
-	if args.cuda:
-		fasterRCNN.cuda()
+	iters_per_epoch = int(train_size / opt.batch_size)
 
-	iters_per_epoch = int(train_size / args.batch_size)
-
-	if args.use_tfboard:
-		from tensorboardX import SummaryWriter
-		logger = SummaryWriter("logs")
+	# tensor board
+	logger = SummaryWriter(opt.log_dir+"runs")
 
 	# epoch loop
-	for epoch in range(args.start_epoch, args.max_epochs + 1):
+	# for epoch in range(args.start_epoch, args.max_epochs + 1):
+	for epoch in range(0, opt.num_epochs + 1):
 		# setting to train mode
 		fasterRCNN.train()
 		loss_temp = 0
 		start = time.time()
 
-		if epoch % (args.lr_decay_step + 1) == 0:
-				adjust_learning_rate(optimizer, args.lr_decay_gamma)
-				lr *= args.lr_decay_gamma
+		if epoch % (opt.step_size + 1) == 0:
+			adjust_learning_rate(optimizer, opt.gamma)
+			lr *= opt.gamma
 
 		data_iter = iter(dataloader)
 
@@ -332,16 +331,17 @@ if __name__ == '__main__':
 			# backward
 			optimizer.zero_grad()
 			loss.backward()
-			if args.net == "vgg16":
+			if opt.arch == "vgg16":
 					clip_gradient(fasterRCNN, 10.)
 			optimizer.step()
 
-			if step % args.disp_interval == 0:
+			opt.disp_interval = 100
+			if step % opt.disp_interval == 0:
 				end = time.time()
 				if step > 0:
-					loss_temp /= (args.disp_interval + 1)
+					loss_temp /= (opt.disp_interval + 1)
 
-				if args.mGPUs:
+				if opt.mGPUs:
 					loss_rpn_cls = rpn_loss_cls.mean().item()
 					loss_rpn_box = rpn_loss_box.mean().item()
 					loss_rcnn_cls = RCNN_loss_cls.mean().item()
@@ -356,35 +356,39 @@ if __name__ == '__main__':
 					fg_cnt = torch.sum(rois_label.data.ne(0))
 					bg_cnt = rois_label.data.numel() - fg_cnt
 
-				print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" \
-																% (args.session, epoch, step, iters_per_epoch, loss_temp, lr))
+				# print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" % (args.session, epoch, step, iters_per_epoch, loss_temp, lr))
+				# print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
+				# print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
+
+				print("[epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" % (epoch, step, iters_per_epoch, loss_temp, lr))
 				print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
-				print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" \
-											% (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
-				if args.use_tfboard:
-					info = {
-						'loss': loss_temp,
-						'loss_rpn_cls': loss_rpn_cls,
-						'loss_rpn_box': loss_rpn_box,
-						'loss_rcnn_cls': loss_rcnn_cls,
-						'loss_rcnn_box': loss_rcnn_box
-					}
-					logger.add_scalars("logs_s_{}/losses".format(args.session), info, (epoch - 1) * iters_per_epoch + step)
+				print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
+
+
+				
+				info = {
+					'loss': loss_temp,
+					'loss_rpn_cls': loss_rpn_cls,
+					'loss_rpn_box': loss_rpn_box,
+					'loss_rcnn_cls': loss_rcnn_cls,
+					'loss_rcnn_box': loss_rcnn_box
+				}
+				logger.add_scalars("runs/losses", info, (epoch - 1) * iters_per_epoch + step)
 
 				loss_temp = 0
 				start = time.time()
 
 		
-		save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
+		save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}.pth'.format(epoch, step))
+		save_name = os.path.join(output_dir, '{}_{}_{}_{}.pth'.format(opt.arch, opt.dataset, epoch, step))
 		save_checkpoint({
-			'session': args.session,
 			'epoch': epoch + 1,
-			'model': fasterRCNN.module.state_dict() if args.mGPUs else fasterRCNN.state_dict(),
+			'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
 			'optimizer': optimizer.state_dict(),
 			'pooling_mode': cfg.POOLING_MODE,
-			'class_agnostic': args.class_agnostic,
+			'class_agnostic': opt.cag,
 		}, save_name)
 		print('save model: {}'.format(save_name))
 
-	if args.use_tfboard:
+	if opt.use_tfboard:
 		logger.close()
