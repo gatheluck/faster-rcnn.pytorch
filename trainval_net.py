@@ -3,9 +3,9 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Jiasen Lu, Jianwei Yang, based on code from Ross Girshick
 # --------------------------------------------------------
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+# from __future__ import absolute_import
+# from __future__ import division
+# from __future__ import print_function
 
 import _init_paths
 import os
@@ -17,6 +17,7 @@ import pdb
 import time
 
 import torch
+torch.backends.cudnn.benchmark = True
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.optim as optim
@@ -89,23 +90,23 @@ def parse_args():
 											default=0.1, type=float)
 
 	# set training session
-	parser.add_argument('--s', dest='session',
-											help='training session',
-											default=1, type=int)
+	# parser.add_argument('--s', dest='session',
+	# 										help='training session',
+	# 										default=1, type=int)
 
 	# resume trained model
 	parser.add_argument('--r', dest='resume',
 											help='resume checkpoint or not',
 											default=False, type=bool)
-	parser.add_argument('--checksession', dest='checksession',
-											help='checksession to load model',
-											default=1, type=int)
+	# parser.add_argument('--checksession', dest='checksession',
+	# 										help='checksession to load model',
+	# 										default=1, type=int)
 	parser.add_argument('--checkepoch', dest='checkepoch',
 											help='checkepoch to load model',
 											default=1, type=int)
-	parser.add_argument('--checkpoint', dest='checkpoint',
-											help='checkpoint to load model',
-											default=0, type=int)
+	# parser.add_argument('--checkpoint', dest='checkpoint',
+	# 										help='checkpoint to load model',
+	# 										default=0, type=int)
 	# log and diaplay
 	parser.add_argument('--use_tfb', dest='use_tfboard',
 											help='whether use tensorboard',
@@ -148,29 +149,37 @@ if __name__ == '__main__':
 	print(args)
 
 	if args.dataset == "pascal_voc":
-			args.imdb_name = "voc_2007_trainval"
+			args.imdb_name    = "voc_2007_trainval"
 			args.imdbval_name = "voc_2007_test"
 			args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
-	elif args.dataset == "pascal_voc_0712":
-			args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
-			args.imdbval_name = "voc_2007_test"
-			args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
-	elif args.dataset == "coco":
-			args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
-			args.imdbval_name = "coco_2014_minival"
-			args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
-	elif args.dataset == "imagenet":
-			args.imdb_name = "imagenet_train"
-			args.imdbval_name = "imagenet_val"
-			args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '30']
-	elif args.dataset == "vg":
-			# train sizes: train, smalltrain, minitrain
-			# train scale: ['150-50-20', '150-50-50', '500-150-80', '750-250-150', '1750-700-450', '1600-400-20']
-			args.imdb_name = "vg_150-50-50_minitrain"
-			args.imdbval_name = "vg_150-50-50_minival"
-			args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
+	# elif args.dataset == "pascal_voc_0712":
+	# 		args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
+	# 		args.imdbval_name = "voc_2007_test"
+	# 		args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
+	# elif args.dataset == "coco":
+	# 		args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
+	# 		args.imdbval_name = "coco_2014_minival"
+	# 		args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
+	# elif args.dataset == "imagenet":
+	# 		args.imdb_name = "imagenet_train"
+	# 		args.imdbval_name = "imagenet_val"
+	# 		args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '30']
+	# elif args.dataset == "vg":
+	# 		# train sizes: train, smalltrain, minitrain
+	# 		# train scale: ['150-50-20', '150-50-50', '500-150-80', '750-250-150', '1750-700-450', '1600-400-20']
+	# 		args.imdb_name = "vg_150-50-50_minitrain"
+	# 		args.imdbval_name = "vg_150-50-50_minival"
+	# 		args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
+	else:
+		raise NotImplementedError
 
-	args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
+
+	if args.large_scale:
+		args.cfg_file = "cfgs/{}_ls.yml".format(args.net) 
+	else:
+		args.cfg_file = "cfgs/{}.yml".format(args.net)
+
+	# args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
 
 	if args.cfg_file is not None:
 		cfg_from_file(args.cfg_file)
@@ -181,7 +190,6 @@ if __name__ == '__main__':
 	pprint.pprint(cfg)
 	np.random.seed(cfg.RNG_SEED)
 
-	#torch.backends.cudnn.benchmark = True
 	if torch.cuda.is_available() and not args.cuda:
 		print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
@@ -290,6 +298,7 @@ if __name__ == '__main__':
 		from tensorboardX import SummaryWriter
 		logger = SummaryWriter("logs")
 
+	# epoch loop
 	for epoch in range(args.start_epoch, args.max_epochs + 1):
 		# setting to train mode
 		fasterRCNN.train()
@@ -301,6 +310,8 @@ if __name__ == '__main__':
 				lr *= args.lr_decay_gamma
 
 		data_iter = iter(dataloader)
+
+		# step loop
 		for step in range(iters_per_epoch):
 			data = next(data_iter)
 			im_data.data.resize_(data[0].size()).copy_(data[0])
