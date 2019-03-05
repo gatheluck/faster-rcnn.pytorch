@@ -32,17 +32,17 @@ from model.utils.net_utils import weights_normal_init, save_net, load_net, adjus
 from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
 
+datasets = ['pascal_voc']
+architectures = ['vgg16','res50','res101','res152']
+
 def parse_args():
 	"""
 	Parse input arguments
 	"""
 	parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
-	parser.add_argument('--dataset', dest='dataset',
-											help='training dataset',
-											default='pascal_voc', type=str)
-	parser.add_argument('--net', dest='net',
-										help='vgg16 | res50 | res101 | res152',
-										default='vgg16', type=str)
+	parser.add_argument('--dataset', type=str, required=True, choices=datasets, help='training dataset')
+	parser.add_argument('--net', type=str, required=True, choices=architectures, help='vgg16 | res50 | res101 | res152')
+	parser.add_argument('--weight_bb', type=str, required=True, help='path to backbone weight')
 	parser.add_argument('--start_epoch', dest='start_epoch',
 											help='starting epoch',
 											default=1, type=int)
@@ -56,9 +56,7 @@ def parse_args():
 											help='number of iterations to display',
 											default=10000, type=int)
 
-	parser.add_argument('--save_dir', dest='save_dir',
-											help='directory to save models', default="models",
-											type=str)
+	parser.add_argument('--save_dir', dest='save_dir', type=str, required=True, help='directory to save models')
 	parser.add_argument('--nw', dest='num_workers',
 											help='number of worker to load data',
 											default=0, type=int)
@@ -71,9 +69,7 @@ def parse_args():
 	parser.add_argument('--mGPUs', dest='mGPUs',
 											help='whether use multiple GPUs',
 											action='store_true')
-	parser.add_argument('--bs', dest='batch_size',
-											help='batch_size',
-											default=1, type=int)
+	parser.add_argument('--bs', dest='batch_size', type=int, required=True, help='batch_size')
 	parser.add_argument('--cag', dest='class_agnostic',
 											help='whether perform class_agnostic bbox regression',
 											action='store_true')
@@ -234,13 +230,13 @@ if __name__ == '__main__':
 
 	# initilize the network here.
 	if args.net == 'vgg16':
-		fasterRCNN = vgg16(imdb.classes, pretrained=True, class_agnostic=args.class_agnostic)
+		fasterRCNN = vgg16(imdb.classes, args.weight_bb, class_agnostic=args.class_agnostic)
 	elif args.net == 'res101':
-		fasterRCNN = resnet(imdb.classes, 101, pretrained=True, class_agnostic=args.class_agnostic)
+		fasterRCNN = resnet(imdb.classes, 101, args.weight_bb, class_agnostic=args.class_agnostic)
 	elif args.net == 'res50':
-		fasterRCNN = resnet(imdb.classes, 50, pretrained=True, class_agnostic=args.class_agnostic)
+		fasterRCNN = resnet(imdb.classes, 50, args.weight_bb, class_agnostic=args.class_agnostic)
 	elif args.net == 'res152':
-		fasterRCNN = resnet(imdb.classes, 152, pretrained=True, class_agnostic=args.class_agnostic)
+		fasterRCNN = resnet(imdb.classes, 152, args.weight_bb, class_agnostic=args.class_agnostic)
 	else:
 		print("network is not defined")
 		pdb.set_trace()
