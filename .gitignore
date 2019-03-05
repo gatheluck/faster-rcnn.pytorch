@@ -26,8 +26,10 @@ aten/build/
 aten/src/ATen/Config.h
 aten/src/ATen/cuda/CUDAConfig.h
 build/
+data/
 dist/
 docs/src/**/*
+logs/
 test/.coverage
 test/cpp/api/mnist
 test/data/gpu_tensors.pt
