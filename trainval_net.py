@@ -316,7 +316,7 @@ if __name__ == '__main__':
 		data_iter = iter(dataloader)
 
 		# step loop
-		iters_per_epoch = 2 # for debug
+		# iters_per_epoch = 2 # for debug
 		for step in range(iters_per_epoch):
 			data = next(data_iter)
 			im_data.data.resize_(data[0].size()).copy_(data[0])
