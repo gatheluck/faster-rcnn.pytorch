@@ -28,10 +28,8 @@ from torch.utils.data.sampler import Sampler
 from roi_data_layer.roidb import combined_roidb
 from roi_data_layer.roibatchLoader import roibatchLoader
 from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
-from model.utils.net_utils import weights_normal_init, save_net, load_net, adjust_learning_rate, clip_gradient
+from model.utils.net_utils import weights_normal_init, save_net, load_net, adjust_learning_rate, clip_gradient, save_checkpoint
 #from model.utils.net_utils import weights_normal_init, save_net, load_net, adjust_learning_rate, save_checkpoint, clip_gradient
-
-from misc import save_checkpoint, save_final
 
 from tensorboardX import SummaryWriter
 
@@ -39,6 +37,8 @@ from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
 
 from options import TrainOptions
+from misc import save_weight, save_final, save_result
+from test_net import test
 
 # datasets = ['pascal_voc']
 # architectures = ['vgg16','res50','res101','res152']
@@ -388,18 +388,38 @@ if __name__ == '__main__':
 		# save_name = os.path.join(opt.log_dir, 'faster_rcnn_{}_{}.pth'.format(epoch, step))
 		if epoch % opt.checkpoint == 0:
 			# save_name = os.path.join(opt.log_dir, '{}_{}_{}_{:03d}epoch_{:06d}step.pth'.format(opt.arch, opt.dataset, opt.bb_weight.split("_")[-1], epoch, step))
-			save_name = os.path.join(opt.log_dir, 'weight_{:03d}epoch.pth'.format(epoch))
-			# save_checkpoint({
-			# 	'epoch': epoch + 1,
-			# 	'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
-			# 	'optimizer': optimizer.state_dict(),
-			# 	'pooling_mode': cfg.POOLING_MODE,
-			# 	'class_agnostic': opt.cag,
-			# }, save_name)
-			save_checkpoint(fasterRCNN, optimizer, epoch, opt.log_dir, opt.mGPUs)
-			print('save checkpoint: {}'.format(save_name))
+			checkpoint_name = os.path.join(opt.log_dir, 'checkpoint.pth')
+			save_checkpoint({
+				'epoch': epoch + 1,
+				'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
+				'optimizer': optimizer.state_dict(),
+				'pooling_mode': cfg.POOLING_MODE,
+				'class_agnostic': opt.cag,
+			}, checkpoint_name)
 
+			weight_name = os.path.join(opt.log_dir, 'weight_{:03d}epoch.pth'.format(epoch))
+			save_weight(fasterRCNN, epoch, opt.log_dir, opt.mGPUs)
+			print('save weight: {}'.format(save_weight))
+
+
+	checkpoint_name = os.path.join(opt.log_dir, 'checkpoint.pth')
+	save_checkpoint({
+		'epoch': epoch + 1,
+		'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
+		'optimizer': optimizer.state_dict(),
+		'pooling_mode': cfg.POOLING_MODE,
+		'class_agnostic': opt.cag,
+	}, checkpoint_name)
 	save_final(fasterRCNN, optimizer, opt.log_dir, opt.mGPUs)	
+	save_result({
+		'loss': loss_temp,
+		'loss_rpn_cls': loss_rpn_cls,
+		'loss_rpn_box': loss_rpn_box,
+		'loss_rcnn_cls': loss_rcnn_cls,
+		'loss_rcnn_box': loss_rcnn_box
+	}, opt.log_dir, opt.result)
 
-	if opt.use_tfboard:
-		logger.close()
+	logger.close()
+
+	# run test
+	if not opt.train_only: test(opt)
