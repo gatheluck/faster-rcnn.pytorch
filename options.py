@@ -85,7 +85,7 @@ class TrainOptions(BaseOptions):
 
 		# model and backbone
 		parser.add_argument('--bb_weight', type=str, required=True, help='path to pretrained backbone weight')
-		parser.add_argument('--checkpoint', type=int, default=1, help='checkpoint epoch')
+		parser.add_argument('--checkpoint', type=int, default=5, help='checkpoint epoch')
 		parser.add_argument('--resume', type=int, default=-1, help='resume epoch for model loading')
 		parser.add_argument('--cag', action='store_true', default=False, help='whether perform class_agnostic bbox regression')							
 		# GPU

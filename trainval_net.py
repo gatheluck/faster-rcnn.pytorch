@@ -28,7 +28,10 @@ from torch.utils.data.sampler import Sampler
 from roi_data_layer.roidb import combined_roidb
 from roi_data_layer.roibatchLoader import roibatchLoader
 from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
-from model.utils.net_utils import weights_normal_init, save_net, load_net, adjust_learning_rate, save_checkpoint, clip_gradient
+from model.utils.net_utils import weights_normal_init, save_net, load_net, adjust_learning_rate, clip_gradient
+#from model.utils.net_utils import weights_normal_init, save_net, load_net, adjust_learning_rate, save_checkpoint, clip_gradient
+
+from misc import save_checkpoint, save_final
 
 from tensorboardX import SummaryWriter
 
@@ -37,8 +40,8 @@ from model.faster_rcnn.resnet import resnet
 
 from options import TrainOptions
 
-datasets = ['pascal_voc']
-architectures = ['vgg16','res50','res101','res152']
+# datasets = ['pascal_voc']
+# architectures = ['vgg16','res50','res101','res152']
 
 # def parse_args():
 # 	"""
@@ -241,11 +244,11 @@ if __name__ == '__main__':
 	# initilize the network here.
 	if opt.arch == 'vgg16':
 		fasterRCNN = vgg16(imdb.classes, opt.bb_weight, class_agnostic=opt.cag)
-	elif opt.arch == 'res50':
+	elif opt.arch == 'resnet50':
 		fasterRCNN = resnet(imdb.classes, 50, opt.bb_weight, class_agnostic=opt.cag)
-	elif opt.arch == 'res101':
+	elif opt.arch == 'resnet101':
 		fasterRCNN = resnet(imdb.classes, 101, opt.bb_weight, class_agnostic=opt.cag)
-	elif opt.net == 'res152':
+	elif opt.net == 'resnet152':
 		fasterRCNN = resnet(imdb.classes, 152, opt.bb_weight, class_agnostic=opt.cag)
 	else:
 		print("network is not defined")
@@ -294,11 +297,13 @@ if __name__ == '__main__':
 	iters_per_epoch = int(train_size / opt.batch_size)
 
 	# tensor board
-	logger = SummaryWriter(opt.log_dir+"runs")
+	logger = SummaryWriter(opt.log_dir+"/runs")
+
+	print("cfg.POOLING_MODE:", cfg.POOLING_MODE)
 
 	# epoch loop
 	# for epoch in range(args.start_epoch, args.max_epochs + 1):
-	for epoch in range(0, opt.num_epochs + 1):
+	for epoch in range(1, opt.num_epochs + 1):
 		# setting to train mode
 		fasterRCNN.train()
 		loss_temp = 0
@@ -311,6 +316,7 @@ if __name__ == '__main__':
 		data_iter = iter(dataloader)
 
 		# step loop
+		iters_per_epoch = 2 # for debug
 		for step in range(iters_per_epoch):
 			data = next(data_iter)
 			im_data.data.resize_(data[0].size()).copy_(data[0])
@@ -365,7 +371,7 @@ if __name__ == '__main__':
 				print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
 
 
-				
+				# tensorboard
 				info = {
 					'loss': loss_temp,
 					'loss_rpn_cls': loss_rpn_cls,
@@ -379,16 +385,21 @@ if __name__ == '__main__':
 				start = time.time()
 
 		
-		save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}.pth'.format(epoch, step))
-		save_name = os.path.join(output_dir, '{}_{}_{}_{}.pth'.format(opt.arch, opt.dataset, epoch, step))
-		save_checkpoint({
-			'epoch': epoch + 1,
-			'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
-			'optimizer': optimizer.state_dict(),
-			'pooling_mode': cfg.POOLING_MODE,
-			'class_agnostic': opt.cag,
-		}, save_name)
-		print('save model: {}'.format(save_name))
+		# save_name = os.path.join(opt.log_dir, 'faster_rcnn_{}_{}.pth'.format(epoch, step))
+		if epoch % opt.checkpoint == 0:
+			# save_name = os.path.join(opt.log_dir, '{}_{}_{}_{:03d}epoch_{:06d}step.pth'.format(opt.arch, opt.dataset, opt.bb_weight.split("_")[-1], epoch, step))
+			save_name = os.path.join(opt.log_dir, 'weight_{:03d}epoch.pth'.format(epoch))
+			# save_checkpoint({
+			# 	'epoch': epoch + 1,
+			# 	'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
+			# 	'optimizer': optimizer.state_dict(),
+			# 	'pooling_mode': cfg.POOLING_MODE,
+			# 	'class_agnostic': opt.cag,
+			# }, save_name)
+			save_checkpoint(fasterRCNN, optimizer, epoch, opt.log_dir, opt.mGPUs)
+			print('save checkpoint: {}'.format(save_name))
+
+	save_final(fasterRCNN, optimizer, opt.log_dir, opt.mGPUs)	
 
 	if opt.use_tfboard:
 		logger.close()
