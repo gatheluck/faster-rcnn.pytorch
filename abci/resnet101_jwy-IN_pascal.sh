@@ -13,5 +13,14 @@ source activate faster-rcnn.pytorch
 cd /home/aaa10329ah/user/waseda/faster-rcnn
 # script
 
-python trainval_net.py -a resnet101 -j 16 -b 16 --cuda -l logs/resnet101_jwy-IN_pascal -r result.json --bb_weight data/models/resnet101_jwy-IN.pth --checkpoint 10 --mGPUs --num_epochs 50 
+python trainval_net.py -a resnet101 \
+											 -j 16 \
+											 -b 16 \
+											 --cuda \
+											 -l logs/resnet101_jwy-IN_pascal \
+											 -r result.json \
+											 --bb_weight data/models/resnet101_jwy-IN.pth \
+											 --checkpoint 10 \
+											 --mGPUs \
+											 --num_epochs 50 
 
