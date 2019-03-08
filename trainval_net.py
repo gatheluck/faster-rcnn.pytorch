@@ -15,6 +15,7 @@ import argparse
 import pprint
 import pdb
 import time
+from tqdm import tqdm
 
 import torch
 torch.backends.cudnn.benchmark = True
@@ -38,7 +39,7 @@ from model.faster_rcnn.resnet import resnet
 
 from options import TrainOptions
 from misc import save_weight, save_final, save_result
-from test_net import test
+# from test_net import test
 
 # datasets = ['pascal_voc']
 # architectures = ['vgg16','res50','res101','res152']
@@ -122,7 +123,6 @@ from test_net import test
 	# args = parser.parse_args()
 	# return args
 
-
 class sampler(Sampler):
 	def __init__(self, train_size, batch_size):
 		self.num_data = train_size
@@ -148,14 +148,14 @@ class sampler(Sampler):
 	def __len__(self):
 		return self.num_data
 
-if __name__ == '__main__':
+
 
 	# args = parse_args()
 
 	# print('Called with args:')
 	# print(args)
 
-	opt = TrainOptions().parse()
+def trainval_net(opt):
 
 	if opt.dataset == "pascal":
 			opt.imdb_name    = "voc_2007_trainval"
@@ -208,6 +208,7 @@ if __name__ == '__main__':
 	cfg.USE_GPU_NMS = opt.cuda
 	imdb, roidb, ratio_list, ratio_index = combined_roidb(opt.imdb_name)
 	train_size = len(roidb)
+	if opt.debugging : train_size=100 # for debugging
 
 	print('{:d} roidb entries'.format(len(roidb)))
 
@@ -317,7 +318,8 @@ if __name__ == '__main__':
 
 		# step loop
 		# iters_per_epoch = 2 # for debug
-		for step in range(iters_per_epoch):
+		# for step in range(iters_per_epoch):
+		for step in tqdm(range(iters_per_epoch)):
 			data = next(data_iter)
 			im_data.data.resize_(data[0].size()).copy_(data[0])
 			im_info.data.resize_(data[1].size()).copy_(data[1])
@@ -379,7 +381,7 @@ if __name__ == '__main__':
 					'loss_rcnn_cls': loss_rcnn_cls,
 					'loss_rcnn_box': loss_rcnn_box
 				}
-				logger.add_scalars("runs/losses", info, (epoch - 1) * iters_per_epoch + step)
+				logger.add_scalars("losses", info, (epoch - 1) * iters_per_epoch + step)
 
 				loss_temp = 0
 				start = time.time()
@@ -422,4 +424,8 @@ if __name__ == '__main__':
 	logger.close()
 
 	# run test
-	if not opt.train_only: test(opt)
+	# if not opt.train_only: test(opt)
+
+if __name__ == "__main__":
+	opt = TrainOptions().parse()
+	trainval_net(opt)
