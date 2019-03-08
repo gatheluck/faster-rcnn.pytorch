@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #$ -l rt_F=1
-#$ -l h_rt=72:00:00
+#$ -l h_rt=24:00:00
 #$ -j y
 #$ -N frcnn_vgg16_jwy-IN_pascal
 #$ -o /home/aaa10329ah/user/waseda/abci_log/frcnn_vgg16_jwy-IN_pascal.o

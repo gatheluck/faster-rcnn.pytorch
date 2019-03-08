@@ -3,8 +3,8 @@
 #$ -l rt_F=1
 #$ -l h_rt=24:00:00
 #$ -j y
-#$ -N frcnn_res50_rge-SIN_pascal
-#$ -o /home/aaa10329ah/user/waseda/abci_log/frcnn_resnet50_rge-SIN_pascal.o
+#$ -N frcnn_res50_fgsm-l-1-IN_pascal
+#$ -o /home/aaa10329ah/user/waseda/abci_log/frcnn_resnet50_fgsm-l-1-IN_pascal.o
 
 source /etc/profile.d/modules.sh
 module load cuda/9.0/9.0.176.4
@@ -14,12 +14,12 @@ cd /home/aaa10329ah/user/waseda/faster-rcnn
 # script
 
 python trainval_net.py -a resnet50 \
-                       -j 16 \
+											 -j 16 \
 											 -b 32 \
 											 --cuda \
-											 -l logs/resnet50_rge-SIN_pascal \
+											 -l logs/resnet50_fgsm-l-1-IN_pascal \
 											 -r result.json \
-											 --bb_weight data/models/resnet50_rge-SIN.pth \
+											 --bb_weight data/models/resnet50_fgsm-l-1-IN.pth \
 											 --checkpoint 10 \
 											 --mGPUs \
 											 --num_epochs 50 
