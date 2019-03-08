@@ -125,3 +125,28 @@ class TestOptions(BaseOptions):
 		parser.add_argument('--gamma', type=float, default=0.1, help='gamma for scheduler')
 
 		return parser
+
+class AllOptions(BaseOptions):
+	def initialize(self, parser):
+		parser = BaseOptions.initialize(self, parser)
+
+		# model and backbone
+		parser.add_argument('--bb_weight', type=str, required=True, help='path to pretrained backbone weight')
+		parser.add_argument('--checkpoint', type=int, default=5, help='checkpoint epoch')
+		parser.add_argument('--resume', type=int, default=-1, help='resume epoch for model loading')
+		parser.add_argument('--cag', action='store_true', default=False, help='whether perform class_agnostic bbox regression')							
+		# GPU
+		parser.add_argument('--mGPUs', action='store_true', default=False, help='use multipule GPU')
+		# hyperparameter and optimaizer
+		parser.add_argument('--optimizer', type=str, default='sgd', help='training optimizer')
+		parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
+		parser.add_argument('--lr', type=float, default=000.1, help='initial learning rate')
+		parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
+		parser.add_argument('--wd', type=float, default=1e-4, help='weight decay')
+		parser.add_argument('--step_size', type=int, default=5, help='step size for scheduler')
+		parser.add_argument('--gamma', type=float, default=0.1, help='gamma for scheduler')
+		#
+		parser.add_argument('--debugging', action='store_true', default=False, help='debug mode')
+		
+		return parser
+
