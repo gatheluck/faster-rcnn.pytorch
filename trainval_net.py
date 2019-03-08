@@ -208,7 +208,7 @@ def trainval_net(opt):
 	cfg.USE_GPU_NMS = opt.cuda
 	imdb, roidb, ratio_list, ratio_index = combined_roidb(opt.imdb_name)
 	train_size = len(roidb)
-	if opt.debugging : train_size=100 # for debugging
+	# if opt.debugging : train_size=100 # for debugging
 
 	print('{:d} roidb entries'.format(len(roidb)))
 

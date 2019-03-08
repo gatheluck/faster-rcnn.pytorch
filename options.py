@@ -146,7 +146,7 @@ class AllOptions(BaseOptions):
 		parser.add_argument('--step_size', type=int, default=5, help='step size for scheduler')
 		parser.add_argument('--gamma', type=float, default=0.1, help='gamma for scheduler')
 		#
-		parser.add_argument('--debugging', action='store_true', default=False, help='debug mode')
+		# parser.add_argument('--debugging', action='store_true', default=False, help='debug mode')
 		
 		return parser
 
