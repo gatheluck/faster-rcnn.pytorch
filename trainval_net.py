@@ -343,11 +343,10 @@ def trainval_net(opt):
 					clip_gradient(fasterRCNN, 10.)
 			optimizer.step()
 
-			opt.disp_interval = 100
-			if step % opt.disp_interval == 0:
+			if step % opt.print_freq == 0:
 				end = time.time()
 				if step > 0:
-					loss_temp /= (opt.disp_interval + 1)
+					loss_temp /= (opt.print_freq + 1)
 
 				if opt.mGPUs:
 					loss_rpn_cls = rpn_loss_cls.mean().item()

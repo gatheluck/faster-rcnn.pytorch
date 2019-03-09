@@ -93,7 +93,7 @@ class TrainOptions(BaseOptions):
 		# hyperparameter and optimaizer
 		parser.add_argument('--optimizer', type=str, default='sgd', help='training optimizer')
 		parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
-		parser.add_argument('--lr', type=float, default=000.1, help='initial learning rate')
+		parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate')
 		parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 		parser.add_argument('--wd', type=float, default=1e-4, help='weight decay')
 		parser.add_argument('--step_size', type=int, default=5, help='step size for scheduler')
@@ -118,7 +118,7 @@ class TestOptions(BaseOptions):
 		# hyperparameter and optimaizer
 		#parser.add_argument('--optimizer', type=str, default='sgd', help='training optimizer')
 		#parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
-		parser.add_argument('--lr', type=float, default=000.1, help='initial learning rate')
+		parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate')
 		parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 		parser.add_argument('--wd', type=float, default=1e-4, help='weight decay')
 		#parser.add_argument('--step_size', type=int, default=5, help='step size for scheduler')
@@ -140,7 +140,7 @@ class AllOptions(BaseOptions):
 		# hyperparameter and optimaizer
 		parser.add_argument('--optimizer', type=str, default='sgd', help='training optimizer')
 		parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
-		parser.add_argument('--lr', type=float, default=000.1, help='initial learning rate')
+		parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate')
 		parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 		parser.add_argument('--wd', type=float, default=1e-4, help='weight decay')
 		parser.add_argument('--step_size', type=int, default=5, help='step size for scheduler')

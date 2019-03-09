@@ -51,6 +51,18 @@ def bbox_transform_batch(ex_rois, gt_rois):
         targets_dw = torch.log(gt_widths / ex_widths.view(1,-1).expand_as(gt_widths))
         targets_dh = torch.log(gt_heights / ex_heights.view(1,-1).expand_as(gt_heights))
 
+        # print("gt_widths:", gt_widths)
+        # print("gt_heights:", gt_heights)
+        # print("ex_widths:", ex_widths)
+        # print("ex_heights:", ex_heights)
+        # print("ex_rois.dim() == 2")
+        # print(gt_widths / ex_widths.view(1,-1).expand_as(gt_widths))
+        # print(gt_heights / ex_heights.view(1,-1).expand_as(gt_heights))
+        # if (gt_widths / ex_widths.view(1,-1).expand_as(gt_widths)) <= 0.0:
+        #   print("ERORR:1")
+        # elif (gt_heights / ex_heights.view(1,-1).expand_as(gt_heights)) <= 0.0:
+        #   print("ERORR:2")
+
     elif ex_rois.dim() == 3:
         ex_widths = ex_rois[:, :, 2] - ex_rois[:, :, 0] + 1.0
         ex_heights = ex_rois[:,:, 3] - ex_rois[:,:, 1] + 1.0
@@ -64,8 +76,21 @@ def bbox_transform_batch(ex_rois, gt_rois):
 
         targets_dx = (gt_ctr_x - ex_ctr_x) / ex_widths
         targets_dy = (gt_ctr_y - ex_ctr_y) / ex_heights
-        targets_dw = torch.log(gt_widths / ex_widths)
-        targets_dh = torch.log(gt_heights / ex_heights)
+        targets_dw = torch.log(gt_widths / ex_widths)   # inside of log becomes all 1
+        targets_dh = torch.log(gt_heights / ex_heights) # inside of log becomes all 1
+
+        # print("gt_widths:", gt_widths)
+        # print("gt_heights:", gt_heights)
+        # print("ex_widths:", ex_widths)
+        # print("ex_heights:", ex_heights)
+        # print("elif ex_rois.dim() == 3")
+        # print(gt_widths / ex_widths)
+        # print(gt_heights / ex_heights)
+        # if (gt_widths / ex_widths) <= 0.0:
+        #   print("ERORR:3")
+        # elif (gt_heights / ex_heights) <= 0.0:
+        #   print("ERORR:4")
+
     else:
         raise ValueError('ex_roi input dimension is not correct.')
 
