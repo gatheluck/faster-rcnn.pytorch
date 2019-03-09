@@ -13,13 +13,13 @@ source activate faster-rcnn.pytorch
 cd /home/aaa10329ah/user/waseda/faster-rcnn
 # script
 
-python trainval_net.py -a vgg16bn \
-											 -j 16 \
-											 -b 32 \
-											 --cuda \
-											 -l logs/IN_pt_norm_ft_vgg16bn \
-											 -r result.json \
-											 --bb_weight data/models/IN_pt_norm_ft_vgg16bn.pth \
-											 --checkpoint 10 \
-											 --mGPUs \
-											 --num_epochs 50 
+python run_all.py -a vgg16bn \
+									-j 16 \
+									-b 32 \
+									--cuda \
+									-l logs/IN_pt_norm_ft_vgg16bn \
+									-r result.json \
+									--bb_weight data/models/IN_pt_norm_ft_vgg16bn.pth \
+									--checkpoint 10 \
+									--mGPUs \
+									--num_epochs 50 
