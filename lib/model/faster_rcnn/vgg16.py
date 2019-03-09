@@ -17,17 +17,21 @@ from model.faster_rcnn.faster_rcnn import _fasterRCNN
 import pdb
 
 class vgg16(_fasterRCNN):
-	def __init__(self, classes, bb_weight, class_agnostic=False):
+	def __init__(self, classes, bb_weight, class_agnostic=False, batch_norm=False):
 		#self.model_path = 'data/pretrained_model/vgg16_caffe.pth'
 		self.model_path = bb_weight
 		self.dout_base_model = 512
 		#self.pretrained = pretrained
 		self.class_agnostic = class_agnostic
+		self.batch_norm = batch_norm
 
 		_fasterRCNN.__init__(self, classes, class_agnostic)
 
 	def _init_modules(self):
-		vgg = models.vgg16()
+		if self.batch_norm:
+			vgg = models.vgg16_bn()
+		else:
+			vgg = models.vgg16()
 		#if self.pretrained:
 		# print("Loading pretrained weights from %s" %(self.model_path))
 		# state_dict = torch.load(self.model_path)
