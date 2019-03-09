@@ -244,12 +244,14 @@ def trainval_net(opt):
 
 	# initilize the network here.
 	if opt.arch == 'vgg16':
-		fasterRCNN = vgg16(imdb.classes, opt.bb_weight, class_agnostic=opt.cag)
+		fasterRCNN = vgg16(imdb.classes, opt.bb_weight, class_agnostic=opt.cag, batch_norm=False)
+	elif opt.arch == 'vgg16bn':
+		fasterRCNN = vgg16(imdb.classes, opt.bb_weight, class_agnostic=opt.cag, batch_norm=True)
 	elif opt.arch == 'resnet50':
 		fasterRCNN = resnet(imdb.classes, 50, opt.bb_weight, class_agnostic=opt.cag)
 	elif opt.arch == 'resnet101':
 		fasterRCNN = resnet(imdb.classes, 101, opt.bb_weight, class_agnostic=opt.cag)
-	elif opt.net == 'resnet152':
+	elif opt.arch == 'resnet152':
 		fasterRCNN = resnet(imdb.classes, 152, opt.bb_weight, class_agnostic=opt.cag)
 	else:
 		print("network is not defined")

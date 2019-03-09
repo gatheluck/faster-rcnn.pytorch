@@ -9,7 +9,7 @@ from torchvision import models
 base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../')
 sys.path.append(base)
 
-model_names = ['vgg16', 'vgg16_bn', 'vgg19', 'vgg19_bn', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
+model_names = ['vgg16', 'vgg16bn', 'vgg19', 'vgg19bn', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
 dataset_names = ['pascal']
 
 class BaseOptions():
