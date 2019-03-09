@@ -194,7 +194,7 @@ class pascal_voc(imdb):
 
 		box_list = []
 		for i in xrange(raw_data.shape[0]):
-			boxes = raw_data[i][:, (1, 0, 3, 2)] - 1
+			boxes = raw_data[i][:, (1, 0, 3, 2)] #- 1
 			keep = ds_utils.unique_boxes(boxes)
 			boxes = boxes[keep, :]
 			keep = ds_utils.filter_small_boxes(boxes, self.config['min_size'])
@@ -232,10 +232,13 @@ class pascal_voc(imdb):
 		for ix, obj in enumerate(objs):
 			bbox = obj.find('bndbox')
 			# Make pixel indexes 0-based
-			x1 = float(bbox.find('xmin').text) - 1
-			y1 = float(bbox.find('ymin').text) - 1
-			x2 = float(bbox.find('xmax').text) - 1
-			y2 = float(bbox.find('ymax').text) - 1
+			x1 = float(bbox.find('xmin').text)# - 1
+			y1 = float(bbox.find('ymin').text)# - 1
+			x2 = float(bbox.find('xmax').text)# - 1
+			y2 = float(bbox.find('ymax').text)# - 1
+			# debugging 
+			#print("x1: {}, x2: {}".format(x1, x2))
+			#print("y1: {}, y2: {}".format(y1, y2))
 
 			diffc = obj.find('difficult')
 			difficult = 0 if diffc == None else int(diffc.text)
