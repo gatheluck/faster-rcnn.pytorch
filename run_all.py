@@ -4,5 +4,5 @@ from options import AllOptions
 
 if __name__ == "__main__":
 	opt = AllOptions().parse()
-	trainval_net(opt)
+	#trainval_net(opt)
 	test_net(opt)
