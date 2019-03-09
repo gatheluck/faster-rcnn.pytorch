@@ -15,7 +15,7 @@ cd /home/aaa10329ah/user/waseda/faster-rcnn
 
 python trainval_net.py -a resnet101 \
 											 -j 16 \
-											 -b 32 \
+											 -b 16 \
 											 --cuda \
 											 -l logs/IN_pt_norm_ft_resnet101 \
 											 -r result.json \
