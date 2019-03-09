@@ -15,7 +15,7 @@ cd /home/aaa10329ah/user/waseda/faster-rcnn
 
 python trainval_net.py -a vgg16 \
 											 -j 16 \
-											 -b 64 \
+											 -b 32 \
 											 --cuda \
 											 -l logs/vgg16_pth-IN_pascal \
 											 -r result.json \
