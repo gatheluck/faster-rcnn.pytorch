@@ -151,7 +151,9 @@ def test_net(opt):
 
 	# initilize the network here.
 	if opt.arch == 'vgg16':
-		fasterRCNN = vgg16(imdb.classes, bb_weight=None, class_agnostic=opt.cag)
+		fasterRCNN = vgg16(imdb.classes, bb_weight=None, class_agnostic=opt.cag, batch_norm=False)
+	elif opt.arch == 'vgg16bn':
+		fasterRCNN = vgg16(imdb.classes, bb_weight=None, class_agnostic=opt.cag, batch_norm=True)
 	elif opt.arch == 'resnet101':
 		fasterRCNN = resnet(imdb.classes, 101, bb_weight=None, class_agnostic=opt.cag)
 	elif opt.arch == 'resnet50':
