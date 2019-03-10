@@ -20,8 +20,8 @@ python run_all.py -a resnet101 \
 									--step_size 8 \
 									--num_epochs 10 
 									--checkpoint 5 \
-									--bb_weight data/models/resnet101_jwy-IN.pth \
-									-l logs/resnet101_jwy-IN_bs04 \
+									--bb_weight ../data/models/resnet101_jwy-IN.pth \
+									-l ../logs/resnet101_jwy-IN_bs04 \
 									-r result.json \
 									--cuda \
 									--mGPUs \
