@@ -16,7 +16,7 @@ cd /home/aaa10329ah/user/waseda/faster-rcnn
 python run_all.py -a vgg16 \
 									-j 16 \
 									-b 16 \
-									-lr 1e-2 \
+									-lr 0.01 \
 									--step_size 8 \
 									--num_epochs 10 \
 									--checkpoint 5 \
