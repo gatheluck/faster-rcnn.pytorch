@@ -18,10 +18,10 @@ python run_all.py -a resnet101 \
 									-b 4 \
 									-lr 1e-2 \
 									--step_size 8 \
-									--num_epochs 10 
+									--num_epochs 10 \
 									--checkpoint 5 \
 									--bb_weight ../data/models/resnet101_pth-IN.pth \
 									-l ../logs/resnet101_pth-IN_bs04 \
 									-r result.json \
 									--cuda \
-									--mGPUs \
+									--mGPUs

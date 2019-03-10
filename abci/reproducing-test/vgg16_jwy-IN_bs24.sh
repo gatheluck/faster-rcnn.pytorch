@@ -18,7 +18,7 @@ python run_all.py -a vgg16 \
 									-b 24 \
 									-lr 1e-2 \
 									--step_size 10 \
-									--num_epochs 10 
+									--num_epochs 10 \
 									--checkpoint 5 \
 									--bb_weight ../data/models/vgg16_jwy-IN.pth \
 									-l ../logs/vgg16_jwy-IN_bs24 \
