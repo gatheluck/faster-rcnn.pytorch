@@ -268,10 +268,11 @@ def trainval_net(opt):
 	for key, value in dict(fasterRCNN.named_parameters()).items():
 		if value.requires_grad:
 			if 'bias' in key:
-				params += [{'params':[value],'lr':lr*(cfg.TRAIN.DOUBLE_BIAS + 1), \
-								'weight_decay': cfg.TRAIN.BIAS_DECAY and cfg.TRAIN.WEIGHT_DECAY or 0}]
+				raise NotImplementedError
+				# params += [{'params':[value],'lr':lr*(cfg.TRAIN.DOUBLE_BIAS + 1), \
+				# 				'weight_decay': cfg.TRAIN.BIAS_DECAY and cfg.TRAIN.WEIGHT_DECAY or 0}]
 			else:
-				params += [{'params':[value],'lr':lr, 'weight_decay': cfg.TRAIN.WEIGHT_DECAY}]
+				params += [{'params':[value],'lr':lr, 'weight_decay': opt.wd}]
 
 	if opt.optimizer == "adam":
 		lr = lr * 0.1
@@ -314,7 +315,7 @@ def trainval_net(opt):
 
 		if epoch % (opt.step_size + 1) == 0:
 			adjust_learning_rate(optimizer, opt.gamma)
-			lr *= opt.gamma
+			lr *= opt.wd
 
 		data_iter = iter(dataloader)
 
