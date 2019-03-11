@@ -5,6 +5,7 @@ import argparse
 
 import torch
 from torchvision import models
+from logger import Logger
 
 base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../')
 sys.path.append(base)
@@ -23,11 +24,13 @@ class BaseOptions():
 		parser.add_argument('-d', '--dataset', type=str, default='pascal', choices=dataset_names, help='dataset: ' + ' | '.join(dataset_names), metavar='DATASET')
 		parser.add_argument('-j', '--num_workers', type=int, default=4, help='number of workers for data loading')
 		parser.add_argument('-b', '--batch_size', type=int, default=8, help='batch size') # resnet50 > 8 (40GB)
+		parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
 		# GPU 
 		parser.add_argument('--cuda', action='store_true', default=None, help='enable GPU')
 		# log
 		parser.add_argument('--print_freq', type=int, default=100, help='print frequency')
 		parser.add_argument('-l', '--log_dir', type=str, required=True, help='log directory')
+		parser.add_argument('--logger_dir',type=str, required=True, help='logger output dir')
 		parser.add_argument('-r', '--result', type=str, required=True, help='result json path')
 
 		self.initialized = True
@@ -75,6 +78,17 @@ class BaseOptions():
 			opt.cuda = False
 			opt.device = 'cpu'
 
+		# logger
+		if not os.path.exists(opt.logger_dir):
+			os.makedirs(opt.logger_dir,exist_ok=True)
+		loggers={}
+		loggers['loss_train'] = Logger(os.path.join(opt.logger_dir, 'loss_train.csv'), opt.num_epochs)
+		loggers['loss_rpn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_cls_train.csv'), opt.num_epochs)
+		loggers['loss_rpn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_box_train.csv'), opt.num_epochs)
+		loggers['loss_rcnn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_cls_train.csv'), opt.num_epochs)
+		loggers['loss_rcnn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_box_train.csv'), opt.num_epochs) 
+		opt.loggers = loggers
+
 		self.opt = opt
 		return self.opt
 			
@@ -92,7 +106,6 @@ class TrainOptions(BaseOptions):
 		parser.add_argument('--mGPUs', action='store_true', default=False, help='use multipule GPU')
 		# hyperparameter and optimaizer
 		parser.add_argument('--optimizer', type=str, default='sgd', help='training optimizer')
-		parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
 		parser.add_argument('--lr', type=float, default=0.0005, help='initial learning rate')
 		parser.add_argument('--wd', type=float, default=0.0005, help='weight decay')
 		parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
@@ -139,7 +152,7 @@ class AllOptions(BaseOptions):
 		parser.add_argument('--mGPUs', action='store_true', default=False, help='use multipule GPU')
 		# hyperparameter and optimaizer
 		parser.add_argument('--optimizer', type=str, default='sgd', help='training optimizer')
-		parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
+		#parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
 		parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate')
 		parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 		parser.add_argument('--wd', type=float, default=1e-4, help='weight decay')

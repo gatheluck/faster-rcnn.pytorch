@@ -305,6 +305,12 @@ def trainval_net(opt):
 
 	print("cfg.POOLING_MODE:", cfg.POOLING_MODE)
 
+	ep_loss_train = 0.0
+	ep_loss_rpn_cls_train = 0.0
+	ep_loss_rpn_box_train = 0.0
+	ep_loss_rcnn_cls_train = 0.0
+	ep_loss_rcnn_box_train = 0.0
+
 	# epoch loop
 	# for epoch in range(args.start_epoch, args.max_epochs + 1):
 	for epoch in range(1, opt.num_epochs + 1):
@@ -341,8 +347,8 @@ def trainval_net(opt):
 			# backward
 			optimizer.zero_grad()
 			loss.backward()
-			if opt.arch == "vgg16":
-					clip_gradient(fasterRCNN, 10.)
+			# if opt.arch == "vgg16":
+			#		clip_gradient(fasterRCNN, 10.)
 			optimizer.step()
 
 			if step % opt.print_freq == 0:
@@ -383,10 +389,30 @@ def trainval_net(opt):
 					'loss_rcnn_box': loss_rcnn_box
 				}
 				logger.add_scalars("losses", info, (epoch - 1) * iters_per_epoch + step)
+				# for logger
+				ep_loss_train += loss_temp
+				ep_loss_rpn_cls_train += loss_rpn_cls
+				ep_loss_rpn_box_train += loss_rpn_box
+				ep_loss_rcnn_cls_train += loss_rcnn_cls
+				ep_loss_rcnn_box_train += loss_rcnn_box
+
 
 				loss_temp = 0
 				start = time.time()
 
+		# end of one epoch
+		# logger
+		opt.loggers['loss_train'].set(ep_loss_train/iters_per_epoch, epoch+1)
+		opt.loggers['loss_rpn_cls_train'].set(ep_loss_rpn_cls_train/iters_per_epoch, epoch+1)
+		opt.loggers['loss_rpn_box_train'].set(ep_loss_rpn_box_train/iters_per_epoch, epoch+1)
+		opt.loggers['loss_rcnn_cls_train'].set(ep_loss_rcnn_cls_train/iters_per_epoch, epoch+1)
+		opt.loggers['loss_rcnn_box_train'].set(ep_loss_rcnn_box_train/iters_per_epoch, epoch+1)
+
+		ep_loss_train = 0.0
+		ep_loss_rpn_cls_train = 0.0
+		ep_loss_rpn_box_train = 0.0
+		ep_loss_rcnn_cls_train = 0.0
+		ep_loss_rcnn_box_train = 0.0
 		
 		# save_name = os.path.join(opt.log_dir, 'faster_rcnn_{}_{}.pth'.format(epoch, step))
 		if epoch % opt.checkpoint == 0:
