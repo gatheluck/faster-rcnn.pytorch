@@ -3,7 +3,7 @@
 #$ -l rt_F=1
 #$ -l h_rt=24:00:00
 #$ -j y
-#$ -N res50_IN-HALF
+#$ -N frcnn_res50_IN-HALF
 #$ -o /home/aaa10329ah/user/waseda/abci_log/frcnn_resnet101_IN-HALF.o
 
 source /etc/profile.d/modules.sh

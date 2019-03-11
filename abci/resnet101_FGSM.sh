@@ -3,7 +3,7 @@
 #$ -l rt_F=1
 #$ -l h_rt=24:00:00
 #$ -j y
-#$ -N res50_FGSM
+#$ -N frcnn_res50_FGSM
 #$ -o /home/aaa10329ah/user/waseda/abci_log/frcnn_resnet101_FGSM.o
 
 source /etc/profile.d/modules.sh
