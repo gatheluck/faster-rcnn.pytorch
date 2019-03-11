@@ -22,8 +22,8 @@ class BaseOptions():
 		# dataset
 		parser.add_argument('-d', '--dataset', type=str, default='pascal', choices=dataset_names, help='dataset: ' + ' | '.join(dataset_names), metavar='DATASET')
 		parser.add_argument('-j', '--num_workers', type=int, default=4, help='number of workers for data loading')
-		parser.add_argument('-b', '--batch_size', type=int, default=256, help='batch size')
-		# GPU
+		parser.add_argument('-b', '--batch_size', type=int, default=8, help='batch size') # resnet50 > 8 (40GB)
+		# GPU 
 		parser.add_argument('--cuda', action='store_true', default=None, help='enable GPU')
 		# log
 		parser.add_argument('--print_freq', type=int, default=100, help='print frequency')
@@ -85,7 +85,7 @@ class TrainOptions(BaseOptions):
 
 		# model and backbone
 		parser.add_argument('--bb_weight', type=str, required=True, help='path to pretrained backbone weight')
-		parser.add_argument('--checkpoint', type=int, default=5, help='checkpoint epoch')
+		parser.add_argument('--checkpoint', type=int, default=1, help='checkpoint epoch')
 		parser.add_argument('--resume', type=int, default=-1, help='resume epoch for model loading')
 		parser.add_argument('--cag', action='store_true', default=False, help='whether perform class_agnostic bbox regression')							
 		# GPU
