@@ -352,10 +352,10 @@ def trainval_net(opt):
 
 			# for logger
 			ep_loss_train += loss_temp
-			ep_loss_rpn_cls_train += loss_rpn_cls.mean().item()   if opt.mGPUs else loss_rpn_cls.item()
-			ep_loss_rpn_box_train += loss_rpn_box.mean().item()   if opt.mGPUs else loss_rpn_box.item()
-			ep_loss_rcnn_cls_train += loss_rcnn_cls.mean().item() if opt.mGPUs else loss_rcnn_cls.item()
-			ep_loss_rcnn_box_train += loss_rcnn_box.mean().item() if opt.mGPUs else loss_rcnn_box.item()
+			ep_loss_rpn_cls_train += rpn_loss_cls.mean().item()    if opt.mGPUs else rpn_loss_cls.item()
+			ep_loss_rpn_box_train += rpn_loss_box.mean().item()    if opt.mGPUs else rpn_loss_box.item()
+			ep_loss_rcnn_cls_train += RCNN_loss_cls.mean().item()  if opt.mGPUs else RCNN_loss_cls.item()
+			ep_loss_rcnn_box_train += RCNN_loss_bbox.mean().item() if opt.mGPUs else RCNN_loss_bbox.item()
 
 			# visualize
 			if step % opt.print_freq == 0:
