@@ -276,10 +276,10 @@ def trainval_net(opt):
 
 	if opt.optimizer == "adam":
 		lr = lr * 0.1
-		optimizer = torch.optim.Adam(params)
+		optimizer = torch.optim.Adam(params, weight_decay=opt.wd)
 
 	elif opt.optimizer == "sgd":
-		optimizer = torch.optim.SGD(params, momentum=cfg.TRAIN.MOMENTUM)
+		optimizer = torch.optim.SGD(params, momentum=cfg.TRAIN.MOMENTUM, weight_decay=opt.wd)
 
 	# if args.resume:
 	# 	load_name = os.path.join(output_dir,
@@ -315,7 +315,6 @@ def trainval_net(opt):
 
 		if epoch % (opt.step_size + 1) == 0:
 			adjust_learning_rate(optimizer, opt.gamma)
-			lr *= opt.wd
 
 		data_iter = iter(dataloader)
 

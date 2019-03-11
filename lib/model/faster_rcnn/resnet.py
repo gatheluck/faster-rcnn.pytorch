@@ -196,6 +196,8 @@ def resnet50(pretrained=False):
 		pretrained (bool): If True, returns a model pre-trained on ImageNet
 	"""
 	model = ResNet(Bottleneck, [3, 4, 6, 3])
+	for k, v in model._modules.items():
+		print(k)
 	if pretrained:
 		model.load_state_dict(model_zoo.load_url(model_urls['resnet50']))
 	return model
@@ -261,11 +263,25 @@ class resnet(_fasterRCNN):
 			state_dict = torch.load(self.model_path)
 			resnet.load_state_dict({k:v for k,v in state_dict.items() if k in resnet.state_dict()})
 		
+		# RCNN_base ###
+		# 0 resnet.conv1          3 > 64
+		# 1 resnet.bn1
+		# 2 resnet.relu
+		# 3 resnet.maxpool
+		# 4 resnet.layer1 (fix):   64  > 256
+		# 5 resnet.layer2 (fix):   256 > 512
+		# 6 resnet.layer3 (train): 512 > 1024
+		# RCNN_top
+		# 7 resnet.layer4 (train): 1024 > 2048
+		#
+		# RCNN_Class_pred
+		# nn.Linear: 2048 > #class
+		#
+		# RCNN_BBox_pred
+		# nn.Linear: 2048 > 4 x #class 
 
 		# Build resnet.
-		self.RCNN_base = nn.Sequential(resnet.conv1, resnet.bn1,resnet.relu,
-			resnet.maxpool,resnet.layer1,resnet.layer2,resnet.layer3)
-
+		self.RCNN_base = nn.Sequential(resnet.conv1, resnet.bn1,resnet.relu, resnet.maxpool,resnet.layer1,resnet.layer2,resnet.layer3)
 		self.RCNN_top = nn.Sequential(resnet.layer4)
 
 		self.RCNN_cls_score = nn.Linear(2048, self.n_classes)
@@ -299,7 +315,8 @@ class resnet(_fasterRCNN):
 		nn.Module.train(self, mode)
 		if mode:
 			# Set fixed blocks to be in eval mode
-			self.RCNN_base.eval()
+			#self.RCNN_base.eval()
+			self.RCNN_base.train()
 			self.RCNN_base[5].train()
 			self.RCNN_base[6].train()
 
