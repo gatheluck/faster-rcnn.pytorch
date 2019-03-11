@@ -369,7 +369,7 @@ def trainval_net(opt):
 				# print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
 				# print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
 
-				print("[epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" % (epoch, step, iters_per_epoch, loss_temp, lr))
+				print("[epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" % (epoch, step, iters_per_epoch, loss_temp, optimizer.param_groups[0]['lr']))
 				print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
 				print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
 
