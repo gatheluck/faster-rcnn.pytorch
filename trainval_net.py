@@ -313,21 +313,21 @@ def trainval_net(opt):
 
 	# epoch loop
 	# for epoch in range(args.start_epoch, args.max_epochs + 1):
-	for epoch in range(1, opt.num_epochs + 1):
+	for epoch in range(1, opt.num_epochs+1):
 		# setting to train mode
 		fasterRCNN.train()
 		loss_temp = 0
 		start = time.time()
 
-		if epoch % (opt.step_size + 1) == 0:
-			adjust_learning_rate(optimizer, opt.gamma)
+		# if epoch % (opt.step_size + 1) == 0:
+		# 	adjust_learning_rate(optimizer, opt.gamma)
 
 		data_iter = iter(dataloader)
 
 		# step loop
 		# iters_per_epoch = 2 # for debug
 		# for step in range(iters_per_epoch):
-		for step in tqdm(range(iters_per_epoch)):
+		for step in tqdm(range(1, iters_per_epoch+1)):
 			data = next(data_iter)
 			im_data.data.resize_(data[0].size()).copy_(data[0])
 			im_info.data.resize_(data[1].size()).copy_(data[1])
@@ -340,8 +340,7 @@ def trainval_net(opt):
 			RCNN_loss_cls, RCNN_loss_bbox, \
 			rois_label = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
 
-			loss = rpn_loss_cls.mean() + rpn_loss_box.mean() \
-						+ RCNN_loss_cls.mean() + RCNN_loss_bbox.mean()
+			loss = rpn_loss_cls.mean() + rpn_loss_box.mean() + RCNN_loss_cls.mean() + RCNN_loss_bbox.mean()
 			loss_temp += loss.item()
 
 			# backward
@@ -351,25 +350,26 @@ def trainval_net(opt):
 			#		clip_gradient(fasterRCNN, 10.)
 			optimizer.step()
 
+			# for logger
+			ep_loss_train += loss_temp
+			ep_loss_rpn_cls_train += loss_rpn_cls.mean().item()   if opt.mGPUs else loss_rpn_cls.item()
+			ep_loss_rpn_box_train += loss_rpn_box.mean().item()   if opt.mGPUs else loss_rpn_box.item()
+			ep_loss_rcnn_cls_train += loss_rcnn_cls.mean().item() if opt.mGPUs else loss_rcnn_cls.item()
+			ep_loss_rcnn_box_train += loss_rcnn_box.mean().item() if opt.mGPUs else loss_rcnn_box.item()
+
+			# visualize
 			if step % opt.print_freq == 0:
 				end = time.time()
 				if step > 0:
 					loss_temp /= (opt.print_freq + 1)
 
-				if opt.mGPUs:
-					loss_rpn_cls = rpn_loss_cls.mean().item()
-					loss_rpn_box = rpn_loss_box.mean().item()
-					loss_rcnn_cls = RCNN_loss_cls.mean().item()
-					loss_rcnn_box = RCNN_loss_bbox.mean().item()
-					fg_cnt = torch.sum(rois_label.data.ne(0))
-					bg_cnt = rois_label.data.numel() - fg_cnt
-				else:
-					loss_rpn_cls = rpn_loss_cls.item()
-					loss_rpn_box = rpn_loss_box.item()
-					loss_rcnn_cls = RCNN_loss_cls.item()
-					loss_rcnn_box = RCNN_loss_bbox.item()
-					fg_cnt = torch.sum(rois_label.data.ne(0))
-					bg_cnt = rois_label.data.numel() - fg_cnt
+				loss_rpn_cls  = rpn_loss_cls.mean().item()   if opt.mGPUs else rpn_loss_cls.item()
+				loss_rpn_box  = rpn_loss_box.mean().item()   if opt.mGPUs else rpn_loss_box.item()
+				loss_rcnn_cls = RCNN_loss_cls.mean().item()  if opt.mGPUs else RCNN_loss_cls.item()
+				loss_rcnn_box = RCNN_loss_bbox.mean().item() if opt.mGPUs else RCNN_loss_bbox.item()
+				fg_cnt = torch.sum(rois_label.data.ne(0))    if opt.mGPUs else torch.sum(rois_label.data.ne(0))
+				bg_cnt = rois_label.data.numel() - fg_cnt    if opt.mGPUs else rois_label.data.numel() - fg_cnt
+				
 
 				# print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" % (args.session, epoch, step, iters_per_epoch, loss_temp, lr))
 				# print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
@@ -389,12 +389,6 @@ def trainval_net(opt):
 					'loss_rcnn_box': loss_rcnn_box
 				}
 				logger.add_scalars("losses", info, (epoch - 1) * iters_per_epoch + step)
-				# for logger
-				ep_loss_train += loss_temp
-				ep_loss_rpn_cls_train += loss_rpn_cls
-				ep_loss_rpn_box_train += loss_rpn_box
-				ep_loss_rcnn_cls_train += loss_rcnn_cls
-				ep_loss_rcnn_box_train += loss_rcnn_box
 
 
 				loss_temp = 0
@@ -402,11 +396,11 @@ def trainval_net(opt):
 
 		# end of one epoch
 		# logger
-		opt.loggers['loss_train'].set(ep_loss_train/iters_per_epoch, epoch+1)
-		opt.loggers['loss_rpn_cls_train'].set(ep_loss_rpn_cls_train/iters_per_epoch, epoch+1)
-		opt.loggers['loss_rpn_box_train'].set(ep_loss_rpn_box_train/iters_per_epoch, epoch+1)
-		opt.loggers['loss_rcnn_cls_train'].set(ep_loss_rcnn_cls_train/iters_per_epoch, epoch+1)
-		opt.loggers['loss_rcnn_box_train'].set(ep_loss_rcnn_box_train/iters_per_epoch, epoch+1)
+		opt.loggers['loss_train'].set(epoch, ep_loss_train/iters_per_epoch)
+		opt.loggers['loss_rpn_cls_train'].set(epoch, ep_loss_rpn_cls_train/iters_per_epoch)
+		opt.loggers['loss_rpn_box_train'].set(epoch, ep_loss_rpn_box_train/iters_per_epoch)
+		opt.loggers['loss_rcnn_cls_train'].set(epoch, ep_loss_rcnn_cls_train/iters_per_epoch)
+		opt.loggers['loss_rcnn_box_train'].set(epoch, ep_loss_rcnn_box_train/iters_per_epoch)
 
 		ep_loss_train = 0.0
 		ep_loss_rpn_cls_train = 0.0
@@ -419,7 +413,7 @@ def trainval_net(opt):
 			# save_name = os.path.join(opt.log_dir, '{}_{}_{}_{:03d}epoch_{:06d}step.pth'.format(opt.arch, opt.dataset, opt.bb_weight.split("_")[-1], epoch, step))
 			checkpoint_name = os.path.join(opt.log_dir, 'checkpoint.pth')
 			save_checkpoint({
-				'epoch': epoch + 1,
+				'epoch': epoch,
 				'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
 				'optimizer': optimizer.state_dict(),
 				'pooling_mode': cfg.POOLING_MODE,
@@ -433,7 +427,7 @@ def trainval_net(opt):
 
 	checkpoint_name = os.path.join(opt.log_dir, 'checkpoint.pth')
 	save_checkpoint({
-		'epoch': epoch + 1,
+		'epoch': epoch,
 		'model': fasterRCNN.module.state_dict() if opt.mGPUs else fasterRCNN.state_dict(),
 		'optimizer': optimizer.state_dict(),
 		'pooling_mode': cfg.POOLING_MODE,
