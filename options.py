@@ -28,7 +28,7 @@ class BaseOptions():
 		# GPU 
 		parser.add_argument('--cuda', action='store_true', default=None, help='enable GPU')
 		# log
-		parser.add_argument('--print_freq', type=int, default=100, help='print frequency')
+		parser.add_argument('--print_per_itr', type=int, default=10, help='print times per iteration')
 		parser.add_argument('-l', '--log_dir', type=str, required=True, help='log directory')
 		parser.add_argument('--logger_dir',type=str, required=True, help='logger output dir')
 		parser.add_argument('-r', '--result', type=str, required=True, help='result json path')
@@ -78,15 +78,24 @@ class BaseOptions():
 			opt.cuda = False
 			opt.device = 'cpu'
 
+		if opt.dataset == 'pascal':
+			opt.train_size = 10022
+		else:
+			raise NotImplementedError 
+
+		opt.num_itr = int(opt.train_size / opt.batch_size)
+		opt.print_freq = int(opt.num_itr / opt.print_per_itr)
+		assert opt.print_freq >= 0
+
 		# logger
 		if not os.path.exists(opt.logger_dir):
 			os.makedirs(opt.logger_dir,exist_ok=True)
 		loggers={}
-		loggers['loss_train'] = Logger(os.path.join(opt.logger_dir, 'loss_train.csv'), opt.num_epochs)
-		loggers['loss_rpn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_cls_train.csv'), opt.num_epochs)
-		loggers['loss_rpn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_box_train.csv'), opt.num_epochs)
-		loggers['loss_rcnn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_cls_train.csv'), opt.num_epochs)
-		loggers['loss_rcnn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_box_train.csv'), opt.num_epochs) 
+		loggers['loss_train'] = Logger(os.path.join(opt.logger_dir, 'loss_train.csv'), opt.num_itr)
+		loggers['loss_rpn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_cls_train.csv'), opt.num_itr)
+		loggers['loss_rpn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_box_train.csv'), opt.num_itr)
+		loggers['loss_rcnn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_cls_train.csv'), opt.num_itr)
+		loggers['loss_rcnn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_box_train.csv'), opt.num_itr) 
 		opt.loggers = loggers
 
 		self.opt = opt
