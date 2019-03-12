@@ -350,18 +350,11 @@ def trainval_net(opt):
 			# ep_loss_rcnn_cls_train += RCNN_loss_cls.mean().item()  if opt.mGPUs else RCNN_loss_cls.item()
 			# ep_loss_rcnn_box_train += RCNN_loss_bbox.mean().item() if opt.mGPUs else RCNN_loss_bbox.item()
 
-			itr_loss_train = loss_temp
-			itr_loss_rpn_cls_train = rpn_loss_cls.mean().item()    if opt.mGPUs else rpn_loss_cls.item()
-			itr_loss_rpn_box_train = rpn_loss_box.mean().item()    if opt.mGPUs else rpn_loss_box.item()
-			itr_loss_rcnn_cls_train = RCNN_loss_cls.mean().item()  if opt.mGPUs else RCNN_loss_cls.item()
-			itr_loss_rcnn_box_train = RCNN_loss_bbox.mean().item() if opt.mGPUs else RCNN_loss_bbox.item()
-
-			# logger
-			opt.loggers['loss_train'].set(step, itr_loss_train)
-			opt.loggers['loss_rpn_cls_train'].set(step, itr_loss_rpn_cls_train)
-			opt.loggers['loss_rpn_box_train'].set(step, itr_loss_rpn_box_train)
-			opt.loggers['loss_rcnn_cls_train'].set(step, itr_loss_rcnn_cls_train)
-			opt.loggers['loss_rcnn_box_train'].set(step, itr_loss_rcnn_box_train)
+			# itr_loss_train = loss_temp
+			# itr_loss_rpn_cls_train = rpn_loss_cls.mean().item()    if opt.mGPUs else rpn_loss_cls.item()
+			# itr_loss_rpn_box_train = rpn_loss_box.mean().item()    if opt.mGPUs else rpn_loss_box.item()
+			# itr_loss_rcnn_cls_train = RCNN_loss_cls.mean().item()  if opt.mGPUs else RCNN_loss_cls.item()
+			# itr_loss_rcnn_box_train = RCNN_loss_bbox.mean().item() if opt.mGPUs else RCNN_loss_bbox.item()
 
 			# visualize
 			if step % opt.print_freq == 0:
@@ -375,6 +368,14 @@ def trainval_net(opt):
 				loss_rcnn_box = RCNN_loss_bbox.mean().item() if opt.mGPUs else RCNN_loss_bbox.item()
 				fg_cnt = torch.sum(rois_label.data.ne(0))    if opt.mGPUs else torch.sum(rois_label.data.ne(0))
 				bg_cnt = rois_label.data.numel() - fg_cnt    if opt.mGPUs else rois_label.data.numel() - fg_cnt
+
+				# logger
+				stamp = int(step/opt.print_freq)
+				opt.loggers['loss_train'].set(stamp, loss_temp)
+				opt.loggers['loss_rpn_cls_train'].set(stamp, loss_rpn_cls)
+				opt.loggers['loss_rpn_box_train'].set(stamp, loss_rpn_box)
+				opt.loggers['loss_rcnn_cls_train'].set(stamp, loss_rcnn_cls)
+				opt.loggers['loss_rcnn_box_train'].set(stamp, loss_rcnn_box)
 
 				# print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" % (args.session, epoch, step, iters_per_epoch, loss_temp, lr))
 				# print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
