@@ -371,6 +371,7 @@ def trainval_net(opt):
 
 				# logger
 				stamp = int(step/opt.print_freq)
+				print("stamp:", stamp)
 				opt.loggers['loss_train'].set(stamp, loss_temp)
 				opt.loggers['loss_rpn_cls_train'].set(stamp, loss_rpn_cls)
 				opt.loggers['loss_rpn_box_train'].set(stamp, loss_rpn_box)
