@@ -23,4 +23,6 @@ python run_all.py -a resnet50 \
 									--bb_weight data/models/resnet50_FGSM-HALF.pth \
 									--checkpoint 10 \
 									--mGPUs \
-									--num_epochs 50 
+									--num_epochs 50 \
+									--lr 0.001 \
+									--wd 0.0005
