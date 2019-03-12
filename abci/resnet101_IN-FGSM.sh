@@ -19,7 +19,7 @@ python run_all.py -a resnet101 \
 									--cuda \
 									-l logs/resnet101_IN-FGSM \
 									-r result.json \
-									--logger_dir logs/logger_test/logger_output\
+									--logger_dir logs/resnet101_IN-FGSM/logger_output\
 									--bb_weight data/models/resnet101_IN-FGSM.pth \
 									--checkpoint 10 \
 									--mGPUs \

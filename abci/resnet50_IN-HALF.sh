@@ -19,7 +19,7 @@ python run_all.py -a resnet50 \
 									--cuda \
 									-l logs/resnet50_IN-HALF \
 									-r result.json \
-									--logger_dir logs/logger_test/logger_output\
+									--logger_dir logs/resnet50_IN-HALF/logger_output\
 									--bb_weight data/models/resnet50_IN-HALF.pth \
 									--checkpoint 10 \
 									--mGPUs \
