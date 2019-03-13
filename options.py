@@ -86,6 +86,8 @@ class BaseOptions():
 		opt.num_itr = int(opt.train_size / opt.batch_size)
 		opt.print_freq = int(opt.num_itr / opt.print_per_itr)
 		assert opt.print_freq >= 0
+		print("num_itr: ", opt.num_itr)
+		print("print_freq:", opt.print_freq)
 
 		# logger
 		if not os.path.exists(opt.logger_dir):
