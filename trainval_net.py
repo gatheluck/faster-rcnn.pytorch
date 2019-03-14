@@ -306,6 +306,9 @@ def trainval_net(opt):
 
 	# epoch loop
 	# for epoch in range(args.start_epoch, args.max_epochs + 1):
+
+	num_itr = 1
+
 	for epoch in range(1, opt.num_epochs+1):
 		# setting to train mode
 		fasterRCNN.train()
@@ -370,13 +373,14 @@ def trainval_net(opt):
 				bg_cnt = rois_label.data.numel() - fg_cnt    if opt.mGPUs else rois_label.data.numel() - fg_cnt
 
 				# logger
-				stamp = int(step/opt.print_freq)
-				print("stamp:", stamp)
-				opt.loggers['loss_train'].set(stamp, loss_temp)
-				opt.loggers['loss_rpn_cls_train'].set(stamp, loss_rpn_cls)
-				opt.loggers['loss_rpn_box_train'].set(stamp, loss_rpn_box)
-				opt.loggers['loss_rcnn_cls_train'].set(stamp, loss_rcnn_cls)
-				opt.loggers['loss_rcnn_box_train'].set(stamp, loss_rcnn_box)
+				#stamp = int(step/opt.print_freq)
+				#print("stamp:", stamp)
+				opt.loggers['loss_train'].set(num_itr, loss_temp)
+				opt.loggers['loss_rpn_cls_train'].set(num_itr, loss_rpn_cls)
+				opt.loggers['loss_rpn_box_train'].set(num_itr, loss_rpn_box)
+				opt.loggers['loss_rcnn_cls_train'].set(num_itr, loss_rcnn_cls)
+				opt.loggers['loss_rcnn_box_train'].set(num_itr, loss_rcnn_box)
+				num_itr += 1
 
 				# print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" % (args.session, epoch, step, iters_per_epoch, loss_temp, lr))
 				# print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
