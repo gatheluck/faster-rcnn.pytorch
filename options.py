@@ -93,11 +93,11 @@ class BaseOptions():
 		if not os.path.exists(opt.logger_dir):
 			os.makedirs(opt.logger_dir,exist_ok=True)
 		loggers={}
-		loggers['loss_train'] = Logger(os.path.join(opt.logger_dir, 'loss_train.csv'), opt.num_itr)
-		loggers['loss_rpn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_cls_train.csv'), opt.num_itr)
-		loggers['loss_rpn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_box_train.csv'), opt.num_itr)
-		loggers['loss_rcnn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_cls_train.csv'), opt.num_itr)
-		loggers['loss_rcnn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_box_train.csv'), opt.num_itr) 
+		loggers['loss_train'] = Logger(os.path.join(opt.logger_dir, 'loss_train.csv'), 5000)
+		loggers['loss_rpn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_cls_train.csv'), 5000)
+		loggers['loss_rpn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_box_train.csv'), 5000)
+		loggers['loss_rcnn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_cls_train.csv'), 5000)
+		loggers['loss_rcnn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_box_train.csv'), 5000) 
 		opt.loggers = loggers
 
 		self.opt = opt
