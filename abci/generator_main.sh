@@ -51,7 +51,7 @@ for model in ${models[@]}; do
 			--checkpoint 10 \
 			--mGPUs \
 			--num_epochs 50 \
-			--lr 0.0001 \
+			--lr 0.001 \
 			--wd 0.0005" >> ${filename}
 	done
 done
