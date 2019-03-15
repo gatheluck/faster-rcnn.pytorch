@@ -7,18 +7,19 @@ if [ ${where} = aist ]; then
 	logdir=~/user/waseda/abci_log
 	projectdir=/home/aaa10329ah/user/waseda/faster-rcnn
 	gpu_ids=0,1,2,3
+	env_name=faster-rcnn.pytorch
 elif [ ${where} = mlab ]; then
 	venv=miniconda3
 	logdir=~/iccv2019/abci_log
 	projectdir=~/iccv2019/faster-rcnn
 	gpu_ids=0,1,2,3
+	env_name=frcnn
 else
 	echo 'Invalid' 1>&2
   exit 1
 fi
 
 project=frcnn #name of the projects
-env_name=faster-rcnn.pytorch
 suffix=main
 mkdir -p ${project}
 for model in ${models[@]}; do
