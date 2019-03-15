@@ -25,6 +25,7 @@ class BaseOptions():
 		parser.add_argument('-j', '--num_workers', type=int, default=4, help='number of workers for data loading')
 		parser.add_argument('-b', '--batch_size', type=int, default=8, help='batch size') # resnet50 > 8 (40GB)
 		parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
+		parser.add_argument('--num_max_itr', type=int, default=50, help='max numer of iteration')
 		# GPU 
 		parser.add_argument('--cuda', action='store_true', default=None, help='enable GPU')
 		# log
@@ -83,6 +84,8 @@ class BaseOptions():
 		else:
 			raise NotImplementedError 
 
+		# for visualization it looks 50 itr is enough
+		#
 		opt.num_itr = int(opt.train_size / opt.batch_size)
 		opt.print_freq = int(opt.num_itr / opt.print_per_itr)
 		assert opt.print_freq >= 0
@@ -93,11 +96,11 @@ class BaseOptions():
 		if not os.path.exists(opt.logger_dir):
 			os.makedirs(opt.logger_dir,exist_ok=True)
 		loggers={}
-		loggers['loss_train'] = Logger(os.path.join(opt.logger_dir, 'loss_train.csv'), 5000)
-		loggers['loss_rpn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_cls_train.csv'), 5000)
-		loggers['loss_rpn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_box_train.csv'), 5000)
-		loggers['loss_rcnn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_cls_train.csv'), 5000)
-		loggers['loss_rcnn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_box_train.csv'), 5000) 
+		loggers['loss_train'] = Logger(os.path.join(opt.logger_dir, 'loss_train.csv'), opt.num_max_itr)
+		loggers['loss_rpn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_cls_train.csv'), opt.num_max_itr)
+		loggers['loss_rpn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rpn_box_train.csv'), opt.num_max_itr)
+		loggers['loss_rcnn_cls_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_cls_train.csv'), opt.num_max_itr)
+		loggers['loss_rcnn_box_train'] = Logger(os.path.join(opt.logger_dir, 'loss_rcnn_box_train.csv'), opt.num_max_itr) 
 		opt.loggers = loggers
 
 		self.opt = opt

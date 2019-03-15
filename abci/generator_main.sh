@@ -54,6 +54,7 @@ for model in ${models[@]}; do
 			--mGPUs \
 			--num_epochs 50 \
 			--lr 0.001 \
+			--num_max_itr 50 \
 			--wd 0.0005" >> ${filename}
 	done
 done

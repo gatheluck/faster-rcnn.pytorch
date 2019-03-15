@@ -310,6 +310,8 @@ def trainval_net(opt):
 	num_itr = 1
 
 	for epoch in range(1, opt.num_epochs+1):
+		if num_itr > opt.num_max_itr:	break # this is temporal code for limited ABCI points
+
 		# setting to train mode
 		fasterRCNN.train()
 		loss_temp = 0
@@ -324,6 +326,8 @@ def trainval_net(opt):
 		# iters_per_epoch = 2 # for debug
 		# for step in range(iters_per_epoch):
 		for step in tqdm(range(1, iters_per_epoch+1)):
+			if num_itr > opt.num_max_itr:	break # this is temporal code for limited ABCI points
+
 			data = next(data_iter)
 			im_data.data.resize_(data[0].size()).copy_(data[0])
 			im_info.data.resize_(data[1].size()).copy_(data[1])
